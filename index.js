@@ -5,8 +5,12 @@ import Docker from 'dockerode';
 import snakeCase from 'lodash.snakecase';
 import envVars from './fixtures/envVars-temp.json';
 
+// CONFIG
 const PORT = 3000;
 const DOCKER_IMAGE = 'lambci/lambda:nodejs12.x';
+const DOCKER_NETWORK = 'deadhappy_network';
+const DIST_PATH = '/Users/duartemendes/deadhappy/repos/deathwish-api/dist';
+const API_NAME = 'deathwish-api';
 
 const templateYaml = readFileSync('./fixtures/template.yaml', 'utf-8');
 const templateYamlWithoutFns = templateYaml.replace(/!/g, '');
@@ -14,6 +18,14 @@ const template = yaml.safeLoad(templateYamlWithoutFns);
 
 const isApiEvent = ({ Type }) => Type.includes('Api');
 const docker = new Docker();
+
+const killOldContainers = async () => {
+  const containersData = await docker.listContainers({ all: true, filters: { label: [`sam-api-proxy.api=${API_NAME}`] } });
+  console.log(`Found ${containersData.length} containers for this api, removing...`);
+
+  const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
+  return Promise.all(containers.map((container) => container.remove({ force: true })));
+}
 
 const parseFunctions = () => Object.entries(envVars).reduce((result, [functionName, environment], i) => {
   const resource = template.Resources[functionName];
@@ -48,18 +60,13 @@ const createContainers = async (functions) => {
         'DOCKER_LAMBDA_STAY_OPEN=1',
         ...Object.entries(environment).map(([key, value]) => `${key}=${value}`)
       ],
-      ExposedPorts: {
-        '9001/tcp': {}
-      },
-      Volumes: {
-        '/var/task': {}
-      },
+      Labels: { 'sam-api-proxy.api': API_NAME },
+      ExposedPorts: { '9001/tcp': {} },
+      Volumes: { '/var/task': {} },
       HostConfig: {
-        Binds: ['/Users/duartemendes/deadhappy/repos/deathwish-api/dist:/var/task:ro,delegated'],
-        PortBindings: {
-          '9001/tcp': [{ HostPort: `${containerPort}` }]
-        },
-        NetworkMode: 'deadhappy_network'
+        Binds: [`${DIST_PATH}:/var/task:ro,delegated`],
+        PortBindings: { '9001/tcp': [{ HostPort: `${containerPort}` }] },
+        NetworkMode: DOCKER_NETWORK
       }
     };
 
@@ -79,8 +86,6 @@ const spinUpServer = (functions) => {
     const { url, method, headers } = req;
     console.log('Received request', { url, method, headers });
 
-    // TODO: pipe request to corresponding container... might need to map querystring, headers, path parameters...
-
     res.end(JSON.stringify({ status: 'ok', data: { functions } }));
   });
 
@@ -94,8 +99,11 @@ async function go() {
   if (ping.toString() !== 'OK') throw new Error('Docker needs to be running');
 
   try {
+    await killOldContainers();
+
     const functions = parseFunctions();
-    const containers = await createContainers(functions);
+
+    await createContainers(functions);
 
     spinUpServer(functions);
   } catch (err) {

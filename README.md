@@ -4,7 +4,8 @@
 
 ## Roadmap
 
-- Support docker networks
+- Pipe requests to correct containers (by path)
+- Build events for Api & HttpApi - headers, querystring, path, body, etc...
 
 ## TODO
 
