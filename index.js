@@ -1,7 +1,7 @@
 import http from 'http';
-import { createWriteStream, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import yaml from 'js-yaml';
-import Docker, { Image } from 'dockerode';
+import Docker from 'dockerode';
 import snakeCase from 'lodash.snakecase';
 import envVars from './fixtures/envVars-temp.json';
 
