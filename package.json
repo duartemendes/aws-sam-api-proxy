@@ -1,0 +1,26 @@
+{
+  "name": "sam-api-proxy",
+  "version": "0.0.1",
+  "description": "AWS Sam Api Proxy using docker",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec babel-node index.js",
+    "test": "jest --coverage"
+  },
+  "author": "Duarte Mendes <duartecostamendes@gmail.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/node": "^7.8.7",
+    "@babel/preset-env": "^7.9.6",
+    "jest": "^25.5.3",
+    "nodemon": "^2.0.3"
+  },
+  "dependencies": {
+    "js-yaml": "^3.13.1"
+  }
+}

@@ -1,0 +1,15 @@
+## editor
+.idea
+.vscode
+
+## dependencies
+node_modules
+
+## tests
+coverage
+
+## macos
+.DS_Store
+
+## local
+fixtures
