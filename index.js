@@ -8,7 +8,7 @@ import envVars from './fixtures/envVars-temp.json';
 
 // CONFIG
 const PORT = 3000;
-const DOCKER_IMAGE = 'lambci/lambda:nodejs12.x';
+const DOCKER_IMAGE = 'lambci/lambda';
 const DOCKER_NETWORK = 'deadhappy_network';
 const DIST_PATH = '/Users/duartemendes/deadhappy/repos/deathwish-api/dist';
 const API_NAME = 'deathwish-api';
@@ -16,6 +16,7 @@ const API_NAME = 'deathwish-api';
 const templateYaml = readFileSync('./fixtures/template.yaml', 'utf-8');
 const templateYamlWithoutFns = templateYaml.replace(/!/g, '');
 const template = yaml.safeLoad(templateYamlWithoutFns);
+const globalRuntime = template?.Globals?.Function?.Runtime;
 
 const isApiEvent = ({ Type }) => Type.includes('Api');
 const docker = new Docker();
@@ -45,12 +46,13 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
   const resource = template.Resources[functionName];
   if (!resource) throw new Error(`Function with name "${functionName}" not found in SAM template`);
 
-  const { Events, Handler } = resource.Properties;
+  const { Events, Handler, Runtime } = resource.Properties;
 
   const apiEvent = Object.values(Events).find(isApiEvent);
   if (!apiEvent) throw new Error(`Api event not found for function with name "${functionName}"`);
 
   const { Type, Properties: { Path, Method } } = apiEvent;
+  const runtime = Runtime ?? globalRuntime;
 
   return result.concat({
     name: functionName,
@@ -60,13 +62,34 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
     method: Method.toLowerCase(),
     containerPort: PORT + i + 1,
     environment,
+    dockerImageWithTag: `${DOCKER_IMAGE}:${runtime}`,
   });
 }, []);
 
+const pullDockerImages = async (functions) => {
+  const dockerImagesWithTag = functions.map(({ dockerImageWithTag }) => dockerImageWithTag);
+  console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
+
+  const promises = dockerImagesWithTag.map((dockerImageWithTag) => new Promise((resolve, reject) => {
+    docker.pull(dockerImageWithTag, (err, stream) => {
+      const onFinished = (err, output) => {
+        err ? reject(err) : resolve(output);
+      };
+      const onProgress = (event) => {
+        console.log(event.status);
+      };
+      docker.modem.followProgress(stream, onFinished, onProgress);
+    });
+  }));
+
+  await Promise.all(promises);
+  console.log('All required docker images have been pulled successfully.');
+}
+
 const createContainers = async (functions) => {
-  const promises = functions.map(async ({ name, environment, containerPort, handler }) => {
+  const promises = functions.map(async ({ name, environment, containerPort, handler, dockerImageWithTag }) => {
     const options = {
-      Image: DOCKER_IMAGE,
+      Image: dockerImageWithTag,
       name: `${snakeCase(name)}_lambda`,
       Cmd: [handler],
       Env: [
@@ -164,6 +187,8 @@ async function go() {
     await killOldContainers();
 
     const functions = parseFunctions();
+
+    await pullDockerImages(functions);
 
     await createContainers(functions);
 

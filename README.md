@@ -5,7 +5,6 @@
 ## Roadmap
 
 - Build events for Api & HttpApi - headers, querystring, path, body, etc...
-- Support several runtimes
 
 ## TODO
 
@@ -15,3 +14,4 @@
 - Read configuration from environment
 - Build docker image
 - Setup CI/CD
+- Write DOCS
