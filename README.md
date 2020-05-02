@@ -4,10 +4,18 @@
 
 ## Roadmap
 
-- Build events for Api & HttpApi - headers, querystring, path, body, etc...
+- All the TODOs...
+- Fill event requestContext data
+- Fill event multiValueHeaders and multiValueQueryStringParameters data
+- Fill event cookies data
+- Fill event stageVariables data
 
 ## TODO
 
+- Log available endpoints on start up
+- Only pull distinct docker images on start up
+- Create a UUID for each request and prefix the logs with it
+- Split code and write unit tests
 - Setup linter
 - Setup husky
 - Setup conventional commits and automatic change logs

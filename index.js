@@ -5,6 +5,7 @@ import Docker from 'dockerode';
 import snakeCase from 'lodash.snakecase';
 import got from 'got';
 import envVars from './fixtures/envVars-temp.json';
+import createApiGatewayProxyEvent from './src/apiGatewayProxyEvent';
 
 // CONFIG
 const PORT = 3000;
@@ -21,6 +22,13 @@ const globalRuntime = template?.Globals?.Function?.Runtime;
 const isApiEvent = ({ Type }) => Type.includes('Api');
 const docker = new Docker();
 
+const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
+  if (i % 2 === 0) {
+    result[current] = rawHeaders[i+1];
+  }
+  return result;
+}, {});
+
 const killOldContainers = async () => {
   const containersData = await docker.listContainers({ all: true, filters: { label: [`sam-api-proxy.api=${API_NAME}`] } });
   console.log(`Found ${containersData.length} containers for this api, removing...`);
@@ -31,10 +39,11 @@ const killOldContainers = async () => {
 
 const buildFnPathData = (path) => {
   const splittedPath = path.split('/');
-  const splittedData = splittedPath.map((part) => ({
-    isParameter: part.startsWith('{'),
-    data: part,
-  }));
+  const splittedData = splittedPath.map((part) => {
+    const isParameter = part.startsWith('{');
+    const data = isParameter ? part.replace(/{|}/g, '') : part;
+    return { isParameter, data }
+  });
 
   return {
     full: path,
@@ -51,13 +60,16 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
   const apiEvent = Object.values(Events).find(isApiEvent);
   if (!apiEvent) throw new Error(`Api event not found for function with name "${functionName}"`);
 
-  const { Type, Properties: { Path, Method } } = apiEvent;
+  const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
   const runtime = Runtime ?? globalRuntime;
 
   return result.concat({
     name: functionName,
     handler: Handler,
-    eventType: Type,
+    event: {
+      type: Type,
+      payloadFormatVersion: PayloadFormatVersion
+    },
     path: buildFnPathData(Path.toLowerCase()),
     method: Method.toLowerCase(),
     containerPort: PORT + i + 1,
@@ -129,9 +141,10 @@ const spinUpServer = (functions) => {
   const server = http.createServer();
 
   server.on('request', async (req, res) => {
-    const { url, method, headers } = req;
-    const [path, qs] = url.split('?');
-    console.log('Received request', { url, method, headers, path, qs });
+    const { url, method, rawHeaders } = req;
+    const [path, querystring] = url.split('?');
+    const headers = buildHeaders(rawHeaders);
+    console.log('Received request', { url, method, headers, path, qs: querystring });
 
     let body = '';
     req.on('readable', () => {
@@ -145,28 +158,15 @@ const spinUpServer = (functions) => {
       const compatibleFns = matchFunctions(functions, { path, method });
       if (compatibleFns.length === 0) return res.writeHead(404).end(JSON.stringify({ status: 'error', message: 'Failed to find a match for this request' }));
       if (compatibleFns.length > 1) return res.writeHead(500).end(JSON.stringify({ status: 'error', message: 'Found multiple matches for this request, must revisit matching functions logic' }));
-      const { containerPort } = compatibleFns[0];
+      const fnData = compatibleFns[0];
+      const { containerPort } = fnData;
       console.log(`Proxying request to port ${containerPort}`);
 
+      const urlToCall = `http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`;
+      const event = createApiGatewayProxyEvent(fnData, { headers, path, method, body, querystring });
+
       const startDate = new Date();
-      const { statusCode, headers: resHeaders, body: resBody } = await got.post(`http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`, {
-        json: {
-          body,
-          path,
-          httpMethod: method,
-          queryStringParameters: {
-            'applicationId': '1',
-          },
-          multiValueQueryStringParameters: {
-            'applicationId': ['1'],
-          },
-          pathParameters: {},
-          headers: {
-            'Authorization': 'User 1'
-          },
-          multiValueHeaders: {}
-        }
-      }).json();
+      const { statusCode, headers: resHeaders, body: resBody } = await got.post(urlToCall, { json: event }).json();
 
       console.log(`Request took ${new Date() - startDate} ms`);
 
