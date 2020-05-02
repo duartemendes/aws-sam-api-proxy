@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import Docker from 'dockerode';
 import snakeCase from 'lodash.snakecase';
+import got from 'got';
 import envVars from './fixtures/envVars-temp.json';
 
 // CONFIG
@@ -27,6 +28,19 @@ const killOldContainers = async () => {
   return Promise.all(containers.map((container) => container.remove({ force: true })));
 }
 
+const buildFnPathData = (path) => {
+  const splittedPath = path.split('/');
+  const splittedData = splittedPath.map((part) => ({
+    isParameter: part.startsWith('{'),
+    data: part,
+  }));
+
+  return {
+    full: path,
+    splitted: splittedData,
+  };
+}
+
 const parseFunctions = () => Object.entries(envVars).reduce((result, [functionName, environment], i) => {
   const resource = template.Resources[functionName];
   if (!resource) throw new Error(`Function with name "${functionName}" not found in SAM template`);
@@ -42,8 +56,8 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
     name: functionName,
     handler: Handler,
     eventType: Type,
-    path: Path,
-    method: Method,
+    path: buildFnPathData(Path.toLowerCase()),
+    method: Method.toLowerCase(),
     containerPort: PORT + i + 1,
     environment,
   });
@@ -79,14 +93,62 @@ const createContainers = async (functions) => {
   return Promise.all(promises);
 }
 
+const matchFunctions = (functions, { path, method }) => functions.filter((fn) => {
+  if (fn.method !== method.toLowerCase()) return false;
+
+  const splittedPath = path.toLowerCase().split('/');
+  if (fn.path.splitted.length !== splittedPath.length) return false;
+
+  return fn.path.splitted.every(({ isParameter, data }, i) => isParameter || data === splittedPath[i]);
+});
+
 const spinUpServer = (functions) => {
   const server = http.createServer();
 
   server.on('request', async (req, res) => {
     const { url, method, headers } = req;
-    console.log('Received request', { url, method, headers });
+    const [path, qs] = url.split('?');
+    console.log('Received request', { url, method, headers, path, qs });
 
-    res.end(JSON.stringify({ status: 'ok', data: { functions } }));
+    let body = '';
+    req.on('readable', () => {
+      const buffer = req.read();
+      if (buffer != null) {
+        body += buffer.toString();
+      }
+    });
+
+    req.on('end', async () => {
+      const compatibleFns = matchFunctions(functions, { path, method });
+      if (compatibleFns.length === 0) return res.writeHead(404).end(JSON.stringify({ status: 'error', message: 'Failed to find a match for this request' }));
+      if (compatibleFns.length > 1) return res.writeHead(500).end(JSON.stringify({ status: 'error', message: 'Found multiple matches for this request, must revisit matching functions logic' }));
+      const { containerPort } = compatibleFns[0];
+      console.log(`Proxying request to port ${containerPort}`);
+
+      const startDate = new Date();
+      const { statusCode, headers: resHeaders, body: resBody } = await got.post(`http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`, {
+        json: {
+          body,
+          path,
+          httpMethod: method,
+          queryStringParameters: {
+            'applicationId': '1',
+          },
+          multiValueQueryStringParameters: {
+            'applicationId': ['1'],
+          },
+          pathParameters: {},
+          headers: {
+            'Authorization': 'User 1'
+          },
+          multiValueHeaders: {}
+        }
+      }).json();
+
+      console.log(`Request took ${new Date() - startDate} ms`);
+
+      res.writeHead(statusCode, resHeaders).end(resBody);
+    });
   });
 
   server.listen(PORT, () => {
@@ -96,7 +158,7 @@ const spinUpServer = (functions) => {
 
 async function go() {
   const ping = await docker.ping();
-  if (ping.toString() !== 'OK') throw new Error('Docker needs to be running');
+  if (ping.toString() !== 'OK') throw new Error('Docker must be running');
 
   try {
     await killOldContainers();

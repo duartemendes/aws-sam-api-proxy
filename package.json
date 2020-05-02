@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "dockerode": "^3.2.0",
+    "got": "^11.0.3",
     "js-yaml": "^3.13.1",
     "lodash.snakecase": "^4.1.1"
   }
