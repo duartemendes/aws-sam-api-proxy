@@ -30,7 +30,7 @@ const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
 }, {});
 
 const killOldContainers = async () => {
-  const containersData = await docker.listContainers({ all: true, filters: { label: [`sam-api-proxy.api=${API_NAME}`] } });
+  const containersData = await docker.listContainers({ all: true, filters: { label: [`aws-sam-api-proxy.api=${API_NAME}`] } });
   console.log(`Found ${containersData.length} containers for this api, removing...`);
 
   const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
@@ -109,7 +109,7 @@ const createContainers = async (functions) => {
         'DOCKER_LAMBDA_STAY_OPEN=1',
         ...Object.entries(environment).map(([key, value]) => `${key}=${value}`)
       ],
-      Labels: { 'sam-api-proxy.api': API_NAME },
+      Labels: { 'aws-sam-api-proxy.api': API_NAME },
       ExposedPorts: { '9001/tcp': {} },
       Volumes: { '/var/task': {} },
       HostConfig: {
@@ -176,6 +176,10 @@ const spinUpServer = (functions) => {
 
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+
+    const endpoints = functions.map(({ method, path }) => ({ method: method.toUpperCase(), path: path.full }));
+    console.log('The following endpoints are exposed:');
+    console.table(endpoints);
   });
 }
 
