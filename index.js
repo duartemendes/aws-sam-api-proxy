@@ -7,15 +7,17 @@ import { v4 as uuidv4 } from 'uuid';
 import envVars from './fixtures/envVars-temp.json';
 import createApiGatewayProxyEvent from './src/apiGatewayProxyEvent';
 import createDockerService from './src/dockerService';
+import {
+  parseFunctionsFromTemplate,
+  matchFunctionAgainstRequest,
+} from './src/serverlessFunctions';
 
 const PORT = Number(process.env.PORT);
 
 const templateYaml = readFileSync('./fixtures/template.yaml', 'utf-8');
 const templateYamlWithoutFns = templateYaml.replace(/!/g, '');
 const template = yaml.safeLoad(templateYamlWithoutFns);
-const globalRuntime = template?.Globals?.Function?.Runtime;
 
-const isApiEvent = ({ Type }) => Type.includes('Api');
 const docker = new Docker();
 
 const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
@@ -24,56 +26,6 @@ const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
   }
   return result;
 }, {});
-
-const buildFnPathData = (path) => {
-  const splittedPath = path.split('/');
-  const splittedData = splittedPath.map((part) => {
-    const isParameter = part.startsWith('{');
-    const data = isParameter ? part.replace(/{|}/g, '') : part;
-    return { isParameter, data }
-  });
-
-  return {
-    full: path,
-    splitted: splittedData,
-  };
-}
-
-const parseFunctions = () => Object.entries(envVars).reduce((result, [functionName, environment], i) => {
-  const resource = template.Resources[functionName];
-  if (!resource) throw new Error(`Function with name "${functionName}" not found in SAM template`);
-
-  const { Events, Handler, Runtime } = resource.Properties;
-
-  const apiEvent = Object.values(Events).find(isApiEvent);
-  if (!apiEvent) throw new Error(`Api event not found for function with name "${functionName}"`);
-
-  const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
-  const runtime = Runtime ?? globalRuntime;
-
-  return result.concat({
-    name: functionName,
-    handler: Handler,
-    event: {
-      type: Type,
-      payloadFormatVersion: PayloadFormatVersion
-    },
-    path: buildFnPathData(Path.toLowerCase()),
-    method: Method.toLowerCase(),
-    containerPort: PORT + i + 1,
-    environment,
-    dockerImageWithTag: `lambci/lambda:${runtime}`,
-  });
-}, []);
-
-const matchFunctions = (functions, { path, method }) => functions.filter((fn) => {
-  if (fn.method !== method.toLowerCase()) return false;
-
-  const splittedPath = path.toLowerCase().split('/');
-  if (fn.path.splitted.length !== splittedPath.length) return false;
-
-  return fn.path.splitted.every(({ isParameter, data }, i) => isParameter || data === splittedPath[i]);
-});
 
 const spinUpServer = (functions) => {
   const server = http.createServer();
@@ -94,7 +46,7 @@ const spinUpServer = (functions) => {
     });
 
     req.on('end', async () => {
-      const compatibleFns = matchFunctions(functions, { path, method });
+      const compatibleFns = matchFunctionAgainstRequest(functions, { path, method });
       if (compatibleFns.length === 0) return res.writeHead(404).end(JSON.stringify({ status: 'error', message: 'Failed to find a match for this request' }));
       if (compatibleFns.length > 1) return res.writeHead(500).end(JSON.stringify({ status: 'error', message: 'Found multiple matches for this request, must revisit matching functions logic' }));
       const fnData = compatibleFns[0];
@@ -123,12 +75,11 @@ const spinUpServer = (functions) => {
 }
 
 async function go() {
-
   try {
     const ping = await docker.ping();
     if (ping.toString() !== 'OK') throw new Error('Docker must be running');
 
-    const functions = parseFunctions();
+    const functions = parseFunctionsFromTemplate(template, envVars, PORT + 1);
     const dockerService = createDockerService(docker, functions);
 
     await Promise.all([
