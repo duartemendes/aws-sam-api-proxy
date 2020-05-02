@@ -5,7 +5,7 @@ const buildFnPathData = (path) => {
   const splittedData = splittedPath.map((part) => {
     const isParameter = part.startsWith('{');
     const data = isParameter ? part.replace(/{|}/g, '') : part;
-    return { isParameter, data }
+    return { isParameter, data };
   });
 
   return {
@@ -34,7 +34,7 @@ export default (template, envVars, portOffset) => {
       handler: Handler,
       event: {
         type: Type,
-        payloadFormatVersion: PayloadFormatVersion
+        payloadFormatVersion: PayloadFormatVersion,
       },
       path: buildFnPathData(Path.toLowerCase()),
       method: Method.toLowerCase(),

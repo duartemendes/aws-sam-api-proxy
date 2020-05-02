@@ -4,18 +4,21 @@ import { matchFunctionAgainstRequest } from '../serverlessFunctions';
 
 const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
   if (i % 2 === 0) {
-    result[current] = rawHeaders[i+1];
+    // eslint-disable-next-line no-param-reassign
+    result[current] = rawHeaders[i + 1];
   }
   return result;
 }, {});
 
-export default (httpClient, functions) => async (req, res) => {
+export default (httpClient, functions) => (req, res) => {
   const id = uuidv4();
   const { url, method, rawHeaders } = req;
   const [path, querystring] = url.split('?');
   const headers = buildHeaders(rawHeaders);
 
-  console.log(`[${id}] Received request`, { url, method, headers, path, qs: querystring });
+  console.log(`[${id}] Received request`, {
+    url, method, headers, path, qs: querystring,
+  });
 
   let body = '';
   req.on('readable', () => {
@@ -25,8 +28,7 @@ export default (httpClient, functions) => async (req, res) => {
     }
   });
 
-  const sendError = (code, message) =>
-    res.writeHead(code).end(JSON.stringify({ status: 'error', message }));
+  const sendError = (code, message) => res.writeHead(code).end(JSON.stringify({ status: 'error', message }));
 
   req.on('end', async () => {
     const matchesFns = matchFunctionAgainstRequest(functions, { path, method });
@@ -38,14 +40,17 @@ export default (httpClient, functions) => async (req, res) => {
     console.log(`[${id}] Proxying request to port ${containerPort}`);
 
     const urlToCall = `http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`;
-    const event = createApiGatewayProxyEvent(matchedFn, { headers, path, method, body, querystring });
+    const event = createApiGatewayProxyEvent(matchedFn, {
+      headers, path, method, body, querystring,
+    });
 
     const startDate = new Date();
-    const { statusCode, headers: resHeaders, body: resBody } = await httpClient.post(urlToCall, { json: event }).json();
+    const upstreamResponse = await httpClient.post(urlToCall, { json: event }).json();
 
     const requestDurationInMs = new Date() - startDate;
     console.log(`[${id}] Http request to lambda function took ${requestDurationInMs} ms`);
 
-    res.writeHead(statusCode, resHeaders).end(resBody);
+    const { statusCode, headers: resHeaders, body: resBody } = upstreamResponse;
+    return res.writeHead(statusCode, resHeaders).end(resBody);
   });
 };

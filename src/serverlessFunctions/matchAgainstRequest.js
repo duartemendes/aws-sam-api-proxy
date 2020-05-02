@@ -5,6 +5,6 @@ export default (functions, { path, method }) => functions.filter((fn) => {
   if (fn.path.splitted.length !== splittedPath.length) return false;
 
   return fn.path.splitted.every(
-    ({ isParameter, data }, i) => isParameter || data === splittedPath[i]
+    ({ isParameter, data }, i) => isParameter || data === splittedPath[i],
   );
 });

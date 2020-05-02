@@ -16,16 +16,18 @@ export default (docker, functions) => ({
 
     console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
 
-    const promises = dockerImagesWithTag.map((dockerImageWithTag) => new Promise((resolve, reject) => {
-      docker.pull(dockerImageWithTag, (err, stream) => {
-        if (err) return reject(err);
+    const promises = dockerImagesWithTag.map((imageTag) => new Promise((resolve, reject) => {
+      docker.pull(imageTag, (pullErr, stream) => {
+        if (pullErr) return reject(pullErr);
         const onFinished = (err, output) => {
+          // eslint-disable-next-line no-unused-expressions
           err ? reject(err) : resolve(output);
         };
         const onProgress = (event) => {
           console.log(event.status);
         };
-        docker.modem.followProgress(stream, onFinished, onProgress);
+
+        return docker.modem.followProgress(stream, onFinished, onProgress);
       });
     }));
 
@@ -39,7 +41,7 @@ export default (docker, functions) => ({
       const container = await docker.createContainer(options);
 
       console.log('Starting container', { id: container.id, name: options.name, exposedPort: fnData.containerPort });
-      await container.start()
+      await container.start();
 
       return container.id;
     });

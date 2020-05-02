@@ -11,4 +11,4 @@ export default async (filePath) => {
   const templateYaml = await readFileAsync(filePath, encoding);
   const sanitizedTemplateYaml = sanitizeTemplate(templateYaml);
   return yaml.safeLoad(sanitizedTemplateYaml);
-}
+};
