@@ -12,8 +12,8 @@
 
 ## TODO
 
-- Split code and write unit tests
 - Setup linter
+- Write unit tests
 - Setup husky
 - Setup conventional commits and automatic change logs
 - Read configuration from environment

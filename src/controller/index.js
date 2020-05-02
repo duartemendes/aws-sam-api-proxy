@@ -1,4 +1,3 @@
-import { post } from 'got';
 import { v4 as uuidv4 } from 'uuid';
 import createApiGatewayProxyEvent from '../apiGatewayProxyEvent';
 import { matchFunctionAgainstRequest } from '../serverlessFunctions';
@@ -10,7 +9,7 @@ const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
   return result;
 }, {});
 
-export default (functions) => async (req, res) => {
+export default (httpClient, functions) => async (req, res) => {
   const id = uuidv4();
   const { url, method, rawHeaders } = req;
   const [path, querystring] = url.split('?');
@@ -42,10 +41,10 @@ export default (functions) => async (req, res) => {
     const event = createApiGatewayProxyEvent(matchedFn, { headers, path, method, body, querystring });
 
     const startDate = new Date();
-    const { statusCode, headers: resHeaders, body: resBody } = await post(urlToCall, { json: event }).json();
+    const { statusCode, headers: resHeaders, body: resBody } = await httpClient.post(urlToCall, { json: event }).json();
 
     const requestDurationInMs = new Date() - startDate;
-    console.log(`[${id}] Request took ${requestDurationInMs} ms`);
+    console.log(`[${id}] Http request to lambda function took ${requestDurationInMs} ms`);
 
     res.writeHead(statusCode, resHeaders).end(resBody);
   });

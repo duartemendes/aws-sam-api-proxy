@@ -1,17 +1,13 @@
+import got from 'got';
 import http from 'http';
-import { readFileSync } from 'fs';
-import yaml from 'js-yaml';
 import Docker from 'dockerode';
 import envVars from './fixtures/envVars-temp.json';
+import parseSAMTemplate from './src/parseSAMTemplate';
 import createController from './src/controller';
 import createDockerService from './src/dockerService';
 import { parseFunctionsFromTemplate } from './src/serverlessFunctions';
 
 const PORT = Number(process.env.PORT);
-
-const templateYaml = readFileSync('./fixtures/template.yaml', 'utf-8');
-const templateYamlWithoutFns = templateYaml.replace(/!/g, '');
-const template = yaml.safeLoad(templateYamlWithoutFns);
 
 const prepareEnvironment = async (dockerService) => {
   await Promise.all([
@@ -22,18 +18,19 @@ const prepareEnvironment = async (dockerService) => {
   await dockerService.createContainers();
 }
 
+const getEndpoints = (functions) => functions
+  .map(({ method, path }) => ({ method: method.toUpperCase(), path: path.full }));
+
 const spinUpServer = (functions) => {
   const server = http.createServer();
-  const controller = createController(functions);
+  const controller = createController(got, functions);
 
   server.on('request', controller);
 
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-
-    const endpoints = functions.map(({ method, path }) => ({ method: method.toUpperCase(), path: path.full }));
     console.log('The following endpoints are exposed:');
-    console.table(endpoints);
+    console.table(getEndpoints(functions));
   });
 }
 
@@ -43,7 +40,10 @@ async function go() {
     const dockerStatus = await docker.ping();
     if (dockerStatus.toString() !== 'OK') throw new Error('Docker must be running');
 
-    const functions = parseFunctionsFromTemplate(template, envVars, PORT + 1);
+    const template = await parseSAMTemplate('./fixtures/template.yaml');
+
+    const portOffset = PORT + 1;
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
     const dockerService = createDockerService(docker, functions);
 
     await prepareEnvironment(dockerService);
