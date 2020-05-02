@@ -12,7 +12,6 @@
 
 ## TODO
 
-- Only pull distinct docker images on start up
 - Create a UUID for each request and prefix the logs with it
 - Split code and write unit tests
 - Setup linter

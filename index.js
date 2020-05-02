@@ -79,7 +79,10 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
 }, []);
 
 const pullDockerImages = async (functions) => {
-  const dockerImagesWithTag = functions.map(({ dockerImageWithTag }) => dockerImageWithTag);
+  const dockerImagesWithTag = functions
+    .map(({ dockerImageWithTag }) => dockerImageWithTag)
+    .filter((value, i, array) => array.indexOf(value) === i);
+
   console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
 
   const promises = dockerImagesWithTag.map((dockerImageWithTag) => new Promise((resolve, reject) => {
