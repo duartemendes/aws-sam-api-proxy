@@ -2,18 +2,13 @@ import http from 'http';
 import { readFileSync } from 'fs';
 import yaml from 'js-yaml';
 import Docker from 'dockerode';
-import snakeCase from 'lodash.snakecase';
 import got from 'got';
 import { v4 as uuidv4 } from 'uuid';
 import envVars from './fixtures/envVars-temp.json';
 import createApiGatewayProxyEvent from './src/apiGatewayProxyEvent';
+import createDockerService from './src/dockerService';
 
-// CONFIG
-const PORT = 3000;
-const DOCKER_IMAGE = 'lambci/lambda';
-const DOCKER_NETWORK = 'deadhappy_network';
-const DIST_PATH = '/Users/duartemendes/deadhappy/repos/deathwish-api/dist';
-const API_NAME = 'deathwish-api';
+const PORT = Number(process.env.PORT);
 
 const templateYaml = readFileSync('./fixtures/template.yaml', 'utf-8');
 const templateYamlWithoutFns = templateYaml.replace(/!/g, '');
@@ -29,14 +24,6 @@ const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
   }
   return result;
 }, {});
-
-const killOldContainers = async () => {
-  const containersData = await docker.listContainers({ all: true, filters: { label: [`aws-sam-api-proxy.api=${API_NAME}`] } });
-  console.log(`Found ${containersData.length} containers for this api, removing...`);
-
-  const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
-  return Promise.all(containers.map((container) => container.remove({ force: true })));
-}
 
 const buildFnPathData = (path) => {
   const splittedPath = path.split('/');
@@ -75,62 +62,9 @@ const parseFunctions = () => Object.entries(envVars).reduce((result, [functionNa
     method: Method.toLowerCase(),
     containerPort: PORT + i + 1,
     environment,
-    dockerImageWithTag: `${DOCKER_IMAGE}:${runtime}`,
+    dockerImageWithTag: `lambci/lambda:${runtime}`,
   });
 }, []);
-
-const pullDockerImages = async (functions) => {
-  const dockerImagesWithTag = functions
-    .map(({ dockerImageWithTag }) => dockerImageWithTag)
-    .filter((value, i, array) => array.indexOf(value) === i);
-
-  console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
-
-  const promises = dockerImagesWithTag.map((dockerImageWithTag) => new Promise((resolve, reject) => {
-    docker.pull(dockerImageWithTag, (err, stream) => {
-      const onFinished = (err, output) => {
-        err ? reject(err) : resolve(output);
-      };
-      const onProgress = (event) => {
-        console.log(event.status);
-      };
-      docker.modem.followProgress(stream, onFinished, onProgress);
-    });
-  }));
-
-  await Promise.all(promises);
-  console.log('All required docker images have been pulled successfully.');
-}
-
-const createContainers = async (functions) => {
-  const promises = functions.map(async ({ name, environment, containerPort, handler, dockerImageWithTag }) => {
-    const options = {
-      Image: dockerImageWithTag,
-      name: `${snakeCase(name)}_lambda`,
-      Cmd: [handler],
-      Env: [
-        'DOCKER_LAMBDA_WATCH=1',
-        'DOCKER_LAMBDA_STAY_OPEN=1',
-        ...Object.entries(environment).map(([key, value]) => `${key}=${value}`)
-      ],
-      Labels: { 'aws-sam-api-proxy.api': API_NAME },
-      ExposedPorts: { '9001/tcp': {} },
-      Volumes: { '/var/task': {} },
-      HostConfig: {
-        Binds: [`${DIST_PATH}:/var/task:ro,delegated`],
-        PortBindings: { '9001/tcp': [{ HostPort: `${containerPort}` }] },
-        NetworkMode: DOCKER_NETWORK
-      }
-    };
-
-    const container = await docker.createContainer(options);
-    console.log('Starting container', { id: container.id, name: options.name, exposedPort: containerPort });
-    await container.start()
-    return container.id;
-  });
-
-  return Promise.all(promises);
-}
 
 const matchFunctions = (functions, { path, method }) => functions.filter((fn) => {
   if (fn.method !== method.toLowerCase()) return false;
@@ -189,17 +123,20 @@ const spinUpServer = (functions) => {
 }
 
 async function go() {
-  const ping = await docker.ping();
-  if (ping.toString() !== 'OK') throw new Error('Docker must be running');
 
   try {
-    await killOldContainers();
+    const ping = await docker.ping();
+    if (ping.toString() !== 'OK') throw new Error('Docker must be running');
 
     const functions = parseFunctions();
+    const dockerService = createDockerService(docker, functions);
 
-    await pullDockerImages(functions);
+    await Promise.all([
+      dockerService.killOldContainers(),
+      dockerService.pullRequiredDockerImages(),
+    ]);
 
-    await createContainers(functions);
+    await dockerService.createContainers();
 
     spinUpServer(functions);
   } catch (err) {
