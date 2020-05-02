@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 import Docker from 'dockerode';
 import snakeCase from 'lodash.snakecase';
 import got from 'got';
+import { v4 as uuidv4 } from 'uuid';
 import envVars from './fixtures/envVars-temp.json';
 import createApiGatewayProxyEvent from './src/apiGatewayProxyEvent';
 
@@ -144,10 +145,11 @@ const spinUpServer = (functions) => {
   const server = http.createServer();
 
   server.on('request', async (req, res) => {
+    const id = uuidv4();
     const { url, method, rawHeaders } = req;
     const [path, querystring] = url.split('?');
     const headers = buildHeaders(rawHeaders);
-    console.log('Received request', { url, method, headers, path, qs: querystring });
+    console.log(`[${id}] Received request`, { url, method, headers, path, qs: querystring });
 
     let body = '';
     req.on('readable', () => {
@@ -163,7 +165,7 @@ const spinUpServer = (functions) => {
       if (compatibleFns.length > 1) return res.writeHead(500).end(JSON.stringify({ status: 'error', message: 'Found multiple matches for this request, must revisit matching functions logic' }));
       const fnData = compatibleFns[0];
       const { containerPort } = fnData;
-      console.log(`Proxying request to port ${containerPort}`);
+      console.log(`[${id}] Proxying request to port ${containerPort}`);
 
       const urlToCall = `http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`;
       const event = createApiGatewayProxyEvent(fnData, { headers, path, method, body, querystring });
@@ -171,7 +173,7 @@ const spinUpServer = (functions) => {
       const startDate = new Date();
       const { statusCode, headers: resHeaders, body: resBody } = await got.post(urlToCall, { json: event }).json();
 
-      console.log(`Request took ${new Date() - startDate} ms`);
+      console.log(`[${id}] Request took ${new Date() - startDate} ms`);
 
       res.writeHead(statusCode, resHeaders).end(resBody);
     });

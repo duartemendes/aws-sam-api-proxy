@@ -12,7 +12,6 @@
 
 ## TODO
 
-- Create a UUID for each request and prefix the logs with it
 - Split code and write unit tests
 - Setup linter
 - Setup husky
