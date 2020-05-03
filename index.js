@@ -1,13 +1,28 @@
 import got from 'got';
 import http from 'http';
+import { readFile } from 'fs';
+import { promisify } from 'util';
 import Docker from 'dockerode';
-import envVars from './fixtures/envVars.json';
 import parseSAMTemplate from './src/parseSAMTemplate';
 import createController from './src/controller';
 import createDockerService from './src/dockerService';
 import { parseFunctionsFromTemplate } from './src/serverlessFunctions';
 
+const encoding = 'utf-8';
+const readFileAsync = promisify(readFile);
 const PORT = Number(process.env.PORT);
+
+const getRequiredDependencies = async () => {
+  const [envVarsString, templateYaml] = await Promise.all([
+    readFileAsync(process.env.ENV_VARS_PATH, encoding),
+    readFileAsync(process.env.TEMPLATE_PATH, encoding),
+  ]);
+
+  const envVars = JSON.parse(envVarsString);
+  const template = await parseSAMTemplate(templateYaml);
+
+  return { envVars, template };
+};
 
 const prepareEnvironment = async (dockerService) => {
   await Promise.all([
@@ -42,8 +57,7 @@ async function go() {
     const dockerStatus = await docker.ping();
     if (dockerStatus.toString() !== 'OK') throw new Error('Docker must be running');
 
-    const template = await parseSAMTemplate(process.env.TEMPLATE_PATH);
-
+    const { template, envVars } = await getRequiredDependencies();
     const portOffset = PORT + 1;
     const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
     const dockerService = createDockerService(docker, functions);
