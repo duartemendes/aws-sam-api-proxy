@@ -45,11 +45,13 @@ describe('controller', () => {
     await onEndCallback();
 
     expect(res.writeHead).toHaveBeenCalledWith(404);
+    expect(res.end).toHaveBeenCalled();
     expect(httpClientStub.post).not.toHaveBeenCalled();
   });
 
-  it('should return 500 when multiple matches are found for the given request', async () => {
-    controller({ ...req, method: 'PUT' }, res);
+  it('should return 500 when an unexpected error occurs', async () => {
+    httpClientStub.post.mockReturnValueOnce();
+    controller({ ...req, method: 'GET' }, res);
 
     expect(req.on).toHaveBeenCalledTimes(2);
     const onEndCallback = req.on.mock.calls[1][1];
@@ -57,7 +59,28 @@ describe('controller', () => {
     await onEndCallback();
 
     expect(res.writeHead).toHaveBeenCalledWith(500);
-    expect(httpClientStub.post).not.toHaveBeenCalled();
+    expect(res.end).toHaveBeenCalled();
+    expect(httpClientStub.post).toHaveBeenCalled();
+  });
+
+  it('should return 502 when upstream return an error', async () => {
+    const upstreamResponse = {
+      errorType: 'Error',
+      errorMessage: 'Failed to initialize handler',
+    };
+    httpClientStub.post.mockReturnValueOnce({
+      json: jest.fn().mockResolvedValueOnce(upstreamResponse),
+    });
+    controller({ ...req, method: 'GET' }, res);
+
+    expect(req.on).toHaveBeenCalledTimes(2);
+    const onEndCallback = req.on.mock.calls[1][1];
+
+    await onEndCallback();
+
+    expect(res.writeHead).toHaveBeenCalledWith(502);
+    expect(res.end).toHaveBeenCalled();
+    expect(httpClientStub.post).toHaveBeenCalled();
   });
 
   it('should return status code, headers and body from integration when a single match is found for the given request', async () => {
@@ -67,7 +90,7 @@ describe('controller', () => {
       },
       path: req.path,
       method: 'GET',
-      body: '',
+      body: null,
       querystring: '',
     });
     const upstreamResponse = {
