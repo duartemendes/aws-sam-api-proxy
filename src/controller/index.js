@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import createApiGatewayProxyEvent from '../apiGatewayProxyEvent';
-import { matchFunctionAgainstRequest } from '../serverlessFunctions';
+import { matchFunctionsAgainstRequest } from '../serverlessFunctions';
 
 const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
   if (i % 2 === 0) {
@@ -31,7 +31,7 @@ export default (httpClient, functions) => (req, res) => {
   const sendError = (code, message) => res.writeHead(code).end(JSON.stringify({ status: 'error', message }));
 
   req.on('end', async () => {
-    const matchesFns = matchFunctionAgainstRequest(functions, { path, method });
+    const matchesFns = matchFunctionsAgainstRequest(functions, { path, method });
     if (matchesFns.length === 0) return sendError(404, 'Failed to find a match for this request');
     if (matchesFns.length > 1) return sendError(500, 'Found multiple matches for this request, must revisit matching functions logic');
 

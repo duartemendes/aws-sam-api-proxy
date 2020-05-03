@@ -1,6 +1,6 @@
 import { parseFunctionsFromTemplate } from '../../src/serverlessFunctions';
 
-describe('parseFromTemplate', () => {
+describe('parseFromTemplate()', () => {
   const envVars = {
     GetSomething: {
       DB_NAME: 'my_database',
