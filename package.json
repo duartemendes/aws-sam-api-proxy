@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "babel-node index.js",
     "test": "jest --coverage",
-    "lint": "eslint 'src/**/*.js'"
+    "lint": "eslint 'src/**/*.js'",
+    "lint:tests": "eslint 'tests/**/*.spec.js'"
   },
   "author": "Duarte Mendes <duartecostamendes@gmail.com>",
   "license": "ISC",
