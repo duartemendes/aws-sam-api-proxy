@@ -1,7 +1,7 @@
 {
   "name": "aws-sam-api-proxy",
   "version": "0.0.1",
-  "description": "AWS Sam Api Proxy using docker",
+  "description": "AWS SAM API Proxy CLI",
   "main": "index.js",
   "scripts": {
     "dev": "babel-node index.js",
