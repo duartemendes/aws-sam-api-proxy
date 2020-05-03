@@ -15,8 +15,8 @@
 - Write unit tests
 - Setup husky
 - Setup conventional commits and automatic change logs
-- Build docker image
-  - How to read envVars json file?
+- Setup CLI
+- Export methods to clean up the house on CLI
 - Setup CI/CD
 - Write DOCS
   - Working example

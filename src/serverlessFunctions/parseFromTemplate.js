@@ -1,4 +1,6 @@
+const isServerlessFunction = ({ Type }) => Type === 'AWS::Serverless::Function';
 const isApiEvent = ({ Type }) => Type.includes('Api');
+const hasApiEvent = ({ Properties }) => Object.values(Properties?.Events ?? {}).some(isApiEvent);
 
 const buildFnPathData = (path) => {
   const splittedPath = path.split('/');
@@ -17,30 +19,27 @@ const buildFnPathData = (path) => {
 export default (template, envVars, portOffset) => {
   const globalRuntime = template?.Globals?.Function?.Runtime;
 
-  return Object.entries(envVars).reduce((result, [functionName, environment], i) => {
-    const resource = template.Resources[functionName];
-    if (!resource) throw new Error(`Function with name "${functionName}" not found in SAM template`);
+  return Object.entries(template.Resources)
+    .filter(([_, resource]) => isServerlessFunction(resource) && hasApiEvent(resource))
+    .reduce((result, [name, resource], i) => {
+      const { Events, Handler, Runtime } = resource.Properties;
 
-    const { Events, Handler, Runtime } = resource.Properties;
+      const apiEvent = Object.values(Events).find(isApiEvent);
+      const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
+      const runtime = Runtime ?? globalRuntime;
 
-    const apiEvent = Object.values(Events).find(isApiEvent);
-    if (!apiEvent) throw new Error(`Api event not found for function with name "${functionName}"`);
-
-    const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
-    const runtime = Runtime ?? globalRuntime;
-
-    return result.concat({
-      name: functionName,
-      handler: Handler,
-      event: {
-        type: Type,
-        payloadFormatVersion: PayloadFormatVersion,
-      },
-      path: buildFnPathData(Path.toLowerCase()),
-      method: Method.toLowerCase(),
-      containerPort: portOffset + i,
-      environment,
-      dockerImageWithTag: `lambci/lambda:${runtime}`,
-    });
-  }, []);
+      return result.concat({
+        name,
+        handler: Handler,
+        event: {
+          type: Type,
+          payloadFormatVersion: PayloadFormatVersion,
+        },
+        path: buildFnPathData(Path.toLowerCase()),
+        method: Method.toLowerCase(),
+        containerPort: portOffset + i,
+        environment: envVars[name] ?? {},
+        dockerImageWithTag: `lambci/lambda:${runtime}`,
+      });
+    }, []);
 };
