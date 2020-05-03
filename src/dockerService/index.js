@@ -1,7 +1,7 @@
 import buildContainerOptions from './buildContainerOptions';
 
 export default (docker, functions) => ({
-  killOldContainers: async () => {
+  removeOldContainers: async () => {
     const label = `aws-sam-api-proxy.api=${process.env.API_NAME}`;
     const containersData = await docker.listContainers({ all: true, filters: { label: [label] } });
     console.log(`Found ${containersData.length} containers for this api, removing...`);

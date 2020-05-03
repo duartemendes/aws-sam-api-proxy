@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT);
 
 const prepareEnvironment = async (dockerService) => {
   await Promise.all([
-    dockerService.killOldContainers(),
+    dockerService.removeOldContainers(),
     dockerService.pullRequiredDockerImages(),
   ]);
 
