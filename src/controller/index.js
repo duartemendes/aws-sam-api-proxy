@@ -1,20 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import createApiGatewayProxyEvent from '../apiGatewayProxyEvent';
 import { matchFunctionsAgainstRequest } from '../serverlessFunctions';
-
-const buildHeaders = (rawHeaders) => rawHeaders.reduce((result, current, i) => {
-  if (i % 2 === 0) {
-    // eslint-disable-next-line no-param-reassign
-    result[current] = rawHeaders[i + 1];
-  }
-  return result;
-}, {});
+import { buildFromRawHeaders } from '../request';
 
 export default (httpClient, functions) => (req, res) => {
   const id = uuidv4();
   const { url, method, rawHeaders } = req;
   const [path, querystring] = url.split('?');
-  const headers = buildHeaders(rawHeaders);
+  const headers = buildFromRawHeaders(rawHeaders);
 
   console.log(`[${id}] Received request`, {
     url, method, headers, path, qs: querystring,
