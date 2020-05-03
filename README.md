@@ -12,7 +12,6 @@
 
 ## TODO
 
-- Write unit tests
 - Setup husky
 - Setup conventional commits and automatic change logs
 - Setup CLI

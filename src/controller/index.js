@@ -6,8 +6,8 @@ import { buildFromRawHeaders } from '../request';
 export default (httpClient, functions) => (req, res) => {
   const id = uuidv4();
   const { url, method, rawHeaders } = req;
-  const [path, querystring] = url.split('?');
-  const headers = buildFromRawHeaders(rawHeaders);
+  const [path, querystring = ''] = url.split('?');
+  const headers = buildFromRawHeaders(rawHeaders ?? []);
 
   console.log(`[${id}] Received request`, {
     url, method, headers, path, qs: querystring,
