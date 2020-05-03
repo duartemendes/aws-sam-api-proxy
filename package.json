@@ -7,7 +7,8 @@
     "dev": "babel-node index.js",
     "test": "jest --coverage",
     "lint": "eslint 'src/**/*.js'",
-    "lint:tests": "eslint 'tests/**/*.spec.js'"
+    "lint:tests": "eslint 'tests/**/*.spec.js'",
+    "release": "standard-version"
   },
   "author": "Duarte Mendes <duartecostamendes@gmail.com>",
   "license": "ISC",
@@ -19,12 +20,15 @@
     "@babel/core": "^7.9.6",
     "@babel/node": "^7.8.7",
     "@babel/preset-env": "^7.9.6",
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
     "husky": "^4.2.5",
-    "jest": "^25.5.3"
+    "jest": "^25.5.3",
+    "standard-version": "^7.1.0"
   },
   "dependencies": {
     "dockerode": "^3.2.0",
@@ -35,7 +39,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm t && npm run lint"
+      "pre-commit": "npm t && npm run lint",
+      "commit-msg": "commitlint -e -V"
     }
   }
 }
