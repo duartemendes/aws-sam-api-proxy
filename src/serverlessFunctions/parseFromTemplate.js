@@ -20,6 +20,7 @@ export default (template, envVars, portOffset) => {
   const globalRuntime = template?.Globals?.Function?.Runtime;
 
   return Object.entries(template.Resources)
+    // eslint-disable-next-line no-unused-vars
     .filter(([_, resource]) => isServerlessFunction(resource) && hasApiEvent(resource))
     .reduce((result, [name, resource], i) => {
       const { Events, Handler, Runtime } = resource.Properties;

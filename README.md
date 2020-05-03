@@ -12,7 +12,6 @@
 
 ## TODO
 
-- Setup husky
 - Setup conventional commits and automatic change logs
 - Setup CLI
 - Export methods to clean up the house on CLI

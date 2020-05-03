@@ -23,6 +23,7 @@
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
+    "husky": "^4.2.5",
     "jest": "^25.5.3"
   },
   "dependencies": {
@@ -31,5 +32,10 @@
     "js-yaml": "^3.13.1",
     "lodash.snakecase": "^4.1.1",
     "uuid": "^8.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm t && npm run lint"
+    }
   }
 }
