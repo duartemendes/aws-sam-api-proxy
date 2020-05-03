@@ -3,7 +3,7 @@ const isApiEvent = ({ Type }) => Type.includes('Api');
 const hasApiEvent = ({ Properties }) => Object.values(Properties?.Events ?? {}).some(isApiEvent);
 
 const buildFnPathData = (path) => {
-  const splittedPath = path.split('/');
+  const splittedPath = path.slice(1).split('/');
   const splittedData = splittedPath.map((part) => {
     const isParameter = part.startsWith('{');
     const data = isParameter ? part.replace(/{|}/g, '') : part;
@@ -35,7 +35,7 @@ export default (template, envVars, portOffset) => {
           type: Type,
           payloadFormatVersion: PayloadFormatVersion,
         },
-        path: buildFnPathData(Path.toLowerCase()),
+        path: buildFnPathData(Path),
         method: Method.toLowerCase(),
         containerPort: portOffset + i,
         environment: envVars[name] ?? {},

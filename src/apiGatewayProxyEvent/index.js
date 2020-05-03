@@ -4,7 +4,7 @@ import api from './api';
 import httpApiVersion1_0 from './httpApiVersion1_0';
 import httpApiVersion2_0 from './httpApiVersion2_0';
 
-const buildPathParameters = (fnPath, path) => path.split('/')
+const buildPathParameters = (fnPath, path) => path.slice(1).split('/')
   .reduce((result, current, i) => {
     if (fnPath.splitted[i].isParameter) {
       const key = fnPath.splitted[i].data;
