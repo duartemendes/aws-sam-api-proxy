@@ -1,51 +1,63 @@
 import buildContainerOptions from './buildContainerOptions';
 
-export default (docker, functions) => ({
-  removeOldContainers: async () => {
-    const label = `aws-sam-api-proxy.api=${process.env.API_NAME}`;
+const LABEL_KEY = 'aws-sam-api-proxy.api';
+
+export default (docker) => {
+  const removeContainers = async (label) => {
     const containersData = await docker.listContainers({ all: true, filters: { label: [label] } });
     console.log(`Found ${containersData.length} containers for this api, removing...`);
 
     const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
     return Promise.all(containers.map((container) => container.remove({ force: true })));
-  },
-  pullRequiredDockerImages: async () => {
-    const dockerImagesWithTag = functions
-      .map(({ dockerImageWithTag }) => dockerImageWithTag)
-      .filter((value, i, array) => array.indexOf(value) === i);
+  };
 
-    console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
+  return {
+    validateDockerStatus: async () => {
+      const dockerStatus = await docker.ping();
+      if (dockerStatus.toString() !== 'OK') {
+        throw new Error('Docker must be running');
+      }
+    },
+    removeAllContainers: async () => removeContainers(LABEL_KEY),
+    removeApiContainers: async (apiName) => removeContainers(`${LABEL_KEY}=${apiName}`),
+    pullRequiredDockerImages: async (functions) => {
+      const dockerImagesWithTag = functions
+        .map(({ dockerImageWithTag }) => dockerImageWithTag)
+        .filter((value, i, array) => array.indexOf(value) === i);
 
-    const promises = dockerImagesWithTag.map((imageTag) => new Promise((resolve, reject) => {
-      docker.pull(imageTag, (pullErr, stream) => {
-        if (pullErr) return reject(pullErr);
-        const onFinished = (err, output) => {
+      console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
+
+      const promises = dockerImagesWithTag.map((imageTag) => new Promise((resolve, reject) => {
+        docker.pull(imageTag, (pullErr, stream) => {
+          if (pullErr) return reject(pullErr);
+          const onFinished = (err, output) => {
           // eslint-disable-next-line no-unused-expressions
-          err ? reject(err) : resolve(output);
-        };
-        const onProgress = (event) => {
-          console.log(event.status);
-        };
+            err ? reject(err) : resolve(output);
+          };
+          const onProgress = (event) => {
+            console.log(event.status);
+          };
 
-        return docker.modem.followProgress(stream, onFinished, onProgress);
+          return docker.modem.followProgress(stream, onFinished, onProgress);
+        });
+      }));
+
+      await Promise.all(promises);
+      console.log('All required docker images have been pulled successfully.');
+    },
+    createContainers: async (functions) => {
+      const promises = functions.map(async (fnData) => {
+        const options = buildContainerOptions(fnData);
+
+        const container = await docker.createContainer(options);
+
+        console.log('Starting container', { id: container.id, name: options.name, exposedPort: fnData.containerPort });
+        await container.start();
+
+        return container.id;
       });
-    }));
 
-    await Promise.all(promises);
-    console.log('All required docker images have been pulled successfully.');
-  },
-  createContainers: async () => {
-    const promises = functions.map(async (fnData) => {
-      const options = buildContainerOptions(fnData);
-
-      const container = await docker.createContainer(options);
-
-      console.log('Starting container', { id: container.id, name: options.name, exposedPort: fnData.containerPort });
-      await container.start();
-
-      return container.id;
-    });
-
-    return Promise.all(promises);
-  },
-});
+      return Promise.all(promises);
+    },
+  };
+};

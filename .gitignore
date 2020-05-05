@@ -13,3 +13,6 @@ coverage
 
 ## local
 fixtures
+
+## distribution
+/dist

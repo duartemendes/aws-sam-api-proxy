@@ -1,34 +1,71 @@
 # aws-sam-api-proxy
 
-## Usage
+## The problem
+
+## Motivation
+
+## CLI
+
+### Install
+
+```bash
+npm i aws-sam-api-proxy -g
+```
+
+### Start API
+
+```bash
+sam-proxy start my-api --port 3000 --template ./template.yaml --dist-path ./dist --env-vars ./fixtures/envVars.json --docker-network my_network
+```
+
+### Cleaning up the house
+
+#### For a specific API
+
+```bash
+sam-proxy cleanup my-api
+```
+
+#### For all APIs
+
+```bash
+sam-proxy cleanup-all
+```
+
+### More
+
+```bash
+sam-proxy --help
+```
+
+## Working example
+
+## Under the hood
 
 ## Roadmap
 
-- All the TODOs...
-- Fill event requestContext data
-- Fill event multiValueHeaders and multiValueQueryStringParameters data
-- Fill event cookies data
-- Fill event stageVariables data
-
-## TODO
-
-- Setup CLI
-- Export methods to clean up the house on CLI
+- Finish unit tests for src/index.js
+- Log upstream response code
+- Use CodeUri over DIST_PATH env var & fallback function handler to Globals.Handler
+- Create BASE_PATH variable (default to __dirname?) to avoid have to specify the entire path in 3 variables
+- Use ES6 modules in bin file
+- Rename pullRequiredDockerImages to pullImages and pass the distinc images array instead of the functions data
+- Send configuration to the dockerService calls instead of setting the variable at the environment
+- Make docker-network optional
+- Make env-vars optional
+- Set default for template option
+- ...MVP...
+- Write README
+- Set "files" on package.json
+- Publish alpha version to NPM
+- Push to GitHub
+- ...RELEASE DONE...
 - Setup CI/CD
-- Write DOCS
-  - Working example
-  - What's missing
-
-## Cleaning up the house
-
-### For a specific api
-
-```bash
-docker rm -f $(docker ps -a -f label=aws-sam-api-proxy.api=api-name -q)
-```
-
-### For all apis
-
-```bash
-docker rm -f $(docker ps -a -f label=aws-sam-api-proxy.api -q)
-```
+- Support JSON template
+- Log levels
+- Fill events missing data:
+  - requestContext
+  - multiValueHeaders
+  - multiValueQueryStringParameters
+  - cookies
+  - stageVariables

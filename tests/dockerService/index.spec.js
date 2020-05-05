@@ -15,6 +15,7 @@ describe('dockerService', () => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
 
     dockerStub = {
+      ping: jest.fn(),
       listContainers: jest.fn(),
       getContainer: jest.fn()
         .mockImplementation(async () => ({
@@ -33,7 +34,7 @@ describe('dockerService', () => {
       },
     };
 
-    dockerService = createDockerService(dockerStub, functions);
+    dockerService = createDockerService(dockerStub);
   });
 
   beforeEach(() => {
@@ -45,8 +46,18 @@ describe('dockerService', () => {
     jest.restoreAllMocks();
   });
 
-  describe('removeOldContainers()', () => {
-    it('should remove all containers with api label', async () => {
+  describe('validateDockerStatus()', () => {
+    it('should throw an error when docker ping return a status other than OK', async () => {
+      dockerStub.ping.mockResolvedValueOnce('ERROR');
+
+      await expect(dockerService.validateDockerStatus()).rejects.toThrowError(
+        'Docker must be running',
+      );
+    });
+  });
+
+  describe('removeAllContainers()', () => {
+    it('should remove all containers', async () => {
       const containersData = [
         { Id: '8e9d292554ec' },
         { Id: 'a4450e5fb9da' },
@@ -54,14 +65,34 @@ describe('dockerService', () => {
       ];
       dockerStub.listContainers.mockResolvedValueOnce(containersData);
 
-      await dockerService.removeOldContainers();
+      await dockerService.removeAllContainers();
 
       expect(dockerStub.listContainers).toHaveBeenCalledWith({
         all: true,
         filters: {
-          label: [
-            `aws-sam-api-proxy.api=${apiName}`,
-          ],
+          label: ['aws-sam-api-proxy.api'],
+        },
+      });
+      expect(removeContainerMock).toHaveBeenCalledTimes(containersData.length);
+      expect(removeContainerMock).toHaveBeenCalledWith({ force: true });
+    });
+  });
+
+  describe('removeApiContainers()', () => {
+    it('should remove all containers for given api', async () => {
+      const containersData = [
+        { Id: '8e9d292554ec' },
+        { Id: 'a4450e5fb9da' },
+        { Id: '593806a20f0e' },
+      ];
+      dockerStub.listContainers.mockResolvedValueOnce(containersData);
+
+      await dockerService.removeApiContainers(apiName);
+
+      expect(dockerStub.listContainers).toHaveBeenCalledWith({
+        all: true,
+        filters: {
+          label: [`aws-sam-api-proxy.api=${apiName}`],
         },
       });
       expect(removeContainerMock).toHaveBeenCalledTimes(containersData.length);
@@ -71,7 +102,7 @@ describe('dockerService', () => {
 
   describe('pullRequiredDockerImages()', () => {
     it('should pull only distinct docker images', async () => {
-      await dockerService.pullRequiredDockerImages();
+      await dockerService.pullRequiredDockerImages(functions);
 
       expect(dockerStub.pull).toHaveBeenCalledTimes(2);
       expect(dockerStub.pull.mock.calls[0][0]).toEqual('lambci/lambda:nodejs12.x');
@@ -81,7 +112,7 @@ describe('dockerService', () => {
 
   describe('createContainers()', () => {
     it('should create and start one container per function', async () => {
-      const containersIds = await dockerService.createContainers();
+      const containersIds = await dockerService.createContainers(functions);
 
       expect(containersIds).toHaveLength(functions.length);
       expect(dockerStub.createContainer).toHaveBeenCalledTimes(functions.length);
