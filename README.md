@@ -44,7 +44,6 @@ sam-proxy --help
 
 ## Roadmap
 
-- Finish unit tests for src/index.js
 - Log upstream response code
 - Use CodeUri over DIST_PATH env var & fallback function handler to Globals.Handler
 - Create BASE_PATH variable (default to __dirname?) to avoid have to specify the entire path in 3 variables
