@@ -14,10 +14,10 @@ program
   .command('start <apiName>')
   .description('start an api')
   .requiredOption('-p, --port <port>', 'The port the server will run on')
-  .requiredOption('-t, --template <template>', 'The path of the SAM template')
+  .requiredOption('-t, --template <template>', 'Relative path to the SAM template')
   .requiredOption('-n, --env-vars <envVars>', 'JSON file containing values for Lambda function\'s environment variables.')
-  .requiredOption('--dist-path <distPath>', 'The path of the dist folder')
   .requiredOption('--docker-network <dockerNetwork>', 'The docker network you want your containers to connect to')
+  .option('--base-path <basePath>', 'The base path of the API', process.cwd())
   .action(async (apiName, options) => {
     await dockerService.validateDockerStatus();
 
@@ -25,18 +25,20 @@ program
       port,
       template,
       envVars,
-      distPath,
+      basePath,
       dockerNetwork,
     } = options;
 
-    await startApi(dockerService, {
+    const params = {
       apiName,
       port,
       template,
       envVars,
-      distPath,
+      basePath,
       dockerNetwork,
-    });
+    };
+
+    await startApi(dockerService, params);
   });
 
 program

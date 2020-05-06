@@ -7,6 +7,7 @@ describe('parseFromTemplate()', () => {
     },
   };
   const portOffset = 3001;
+  const basePath = '/Users/foo/api';
 
   it('should ignore resources that are not serverless functions', () => {
     const template = {
@@ -17,7 +18,7 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions).toEqual([]);
   });
@@ -41,7 +42,7 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions).toEqual([]);
   });
@@ -69,7 +70,7 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions).toHaveLength(1);
     expect(functions[0]).toEqual({
@@ -108,6 +109,7 @@ describe('parseFromTemplate()', () => {
       containerPort: portOffset,
       environment: envVars.GetSomething,
       dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+      distPath: '/Users/foo/api/dist',
     });
   });
 
@@ -151,24 +153,24 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions).toHaveLength(2);
   });
 
-  it('should fallback to global runtime when function is missing it', () => {
+  it('should fallback to global Runtime, CodeUri and Handler when function is missing it', () => {
     const template = {
       Globals: {
         Function: {
           Runtime: 'nodejs10.x',
+          CodeUri: './dist',
+          Handler: 'GetResourcesHandler.default',
         },
       },
       Resources: {
         GetResources: {
           Type: 'AWS::Serverless::Function',
           Properties: {
-            CodeUri: './dist',
-            Handler: 'GetResourcesHandler.default',
             Events: {
               GetResourcesEvent: {
                 Type: 'Api',
@@ -183,9 +185,11 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions[0].dockerImageWithTag).toEqual('lambci/lambda:nodejs10.x');
+    expect(functions[0].distPath).toEqual('/Users/foo/api/dist');
+    expect(functions[0].handler).toEqual('GetResourcesHandler.default');
   });
 
   it('should provide payloadFormatVersion when event is of type HttpApi', () => {
@@ -212,7 +216,7 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions[0].event.payloadFormatVersion).toEqual('2.0');
   });

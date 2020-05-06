@@ -13,9 +13,10 @@ jest.mock('../src/serverlessFunctions', () => ({
 describe('index', () => {
   const options = {
     apiName: 'test-api',
+    basePath: __dirname,
     port: '3000',
-    template: path.join(__dirname, './fixtures/template.yaml'),
-    envVars: path.join(__dirname, './fixtures/envVars.json'),
+    template: './fixtures/template.yaml',
+    envVars: './fixtures/envVars.json',
   };
   let dockerServiceStub;
 
@@ -35,7 +36,6 @@ describe('index', () => {
 
   afterAll(() => {
     delete process.env.API_NAME;
-    delete process.env.DIST_PATH;
     delete process.env.DOCKER_NETWORK;
     jest.restoreAllMocks();
   });

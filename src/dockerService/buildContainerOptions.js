@@ -1,7 +1,7 @@
 import snakeCase from 'lodash.snakecase';
 
 export default ({
-  name, environment, containerPort, handler, dockerImageWithTag,
+  name, environment, containerPort, handler, dockerImageWithTag, distPath,
 }) => ({
   Image: dockerImageWithTag,
   name: `${snakeCase(name)}_lambda`,
@@ -15,7 +15,7 @@ export default ({
   ExposedPorts: { '9001/tcp': {} },
   Volumes: { '/var/task': {} },
   HostConfig: {
-    Binds: [`${process.env.DIST_PATH}:/var/task:ro,delegated`],
+    Binds: [`${distPath}:/var/task:ro,delegated`],
     PortBindings: { '9001/tcp': [{ HostPort: `${containerPort}` }] },
     NetworkMode: process.env.DOCKER_NETWORK,
   },

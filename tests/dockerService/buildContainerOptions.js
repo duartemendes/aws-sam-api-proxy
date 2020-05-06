@@ -2,18 +2,15 @@ import buildContainerOptions from '../../src/dockerService/buildContainerOptions
 
 describe('buildContainerOptions()', () => {
   const apiName = 'test-api';
-  const distPath = './dist';
   const dockerNetwork = 'test_network';
 
   beforeAll(() => {
     process.env.API_NAME = apiName;
-    process.env.DIST_PATH = distPath;
     process.env.DOCKER_NETWORK = dockerNetwork;
   });
 
   afterAll(() => {
     delete process.env.API_NAME;
-    delete process.env.DIST_PATH;
     delete process.env.DOCKER_NETWORK;
   });
 
@@ -27,6 +24,7 @@ describe('buildContainerOptions()', () => {
       containerPort: 3001,
       handler: 'GetResourceHandler.default',
       dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+      distPath: '/Users/foo/api/dist',
     };
 
     const containerOptions = buildContainerOptions(functionData);
@@ -54,7 +52,7 @@ describe('buildContainerOptions()', () => {
       },
       HostConfig: {
         Binds: [
-          `${distPath}:/var/task/ro,delegated`,
+          `${functionData.distPath}:/var/task/ro,delegated`,
         ],
         PortBindings: {
           '9001/tcp': [
