@@ -9,7 +9,6 @@ describe('dockerService', () => {
   let dockerService;
 
   beforeAll(() => {
-    process.env.API_NAME = apiName;
     startContainerMock = jest.fn();
     removeContainerMock = jest.fn();
     jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -42,7 +41,6 @@ describe('dockerService', () => {
   });
 
   afterAll(() => {
-    delete process.env.API_NAME;
     jest.restoreAllMocks();
   });
 
@@ -112,7 +110,7 @@ describe('dockerService', () => {
 
   describe('createContainers()', () => {
     it('should create and start one container per function', async () => {
-      const containersIds = await dockerService.createContainers(functions);
+      const containersIds = await dockerService.createContainers(functions, { apiName });
 
       expect(containersIds).toHaveLength(functions.length);
       expect(dockerStub.createContainer).toHaveBeenCalledTimes(functions.length);

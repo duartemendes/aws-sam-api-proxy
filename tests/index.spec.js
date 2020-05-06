@@ -14,7 +14,7 @@ describe('index', () => {
   const options = {
     apiName: 'test-api',
     basePath: __dirname,
-    port: '3000',
+    port: 3000,
     template: './fixtures/template.yaml',
     envVars: './fixtures/envVars.json',
   };
@@ -35,8 +35,6 @@ describe('index', () => {
   });
 
   afterAll(() => {
-    delete process.env.API_NAME;
-    delete process.env.DOCKER_NETWORK;
     jest.restoreAllMocks();
   });
 
@@ -52,9 +50,9 @@ describe('index', () => {
     expect(dockerServiceStub.pullRequiredDockerImages).toHaveBeenCalledWith(functions);
 
     expect(dockerServiceStub.createContainers).toHaveBeenCalledTimes(1);
-    expect(dockerServiceStub.createContainers).toHaveBeenCalledWith(functions);
+    expect(dockerServiceStub.createContainers).toHaveBeenCalledWith(functions, options);
 
     expect(spinUpServer).toHaveBeenCalledTimes(1);
-    expect(spinUpServer).toHaveBeenCalledWith(functions, Number(options.port));
+    expect(spinUpServer).toHaveBeenCalledWith(functions, options.port, options.apiName);
   });
 });

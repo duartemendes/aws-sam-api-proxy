@@ -4,16 +4,6 @@ describe('buildContainerOptions()', () => {
   const apiName = 'test-api';
   const dockerNetwork = 'test_network';
 
-  beforeAll(() => {
-    process.env.API_NAME = apiName;
-    process.env.DOCKER_NETWORK = dockerNetwork;
-  });
-
-  afterAll(() => {
-    delete process.env.API_NAME;
-    delete process.env.DOCKER_NETWORK;
-  });
-
   it('should build container options from function data', () => {
     const functionData = {
       name: 'GetResource',
@@ -27,7 +17,7 @@ describe('buildContainerOptions()', () => {
       distPath: '/Users/foo/api/dist',
     };
 
-    const containerOptions = buildContainerOptions(functionData);
+    const containerOptions = buildContainerOptions(functionData, { apiName, dockerNetwork });
 
     expect(containerOptions).toEqual({
       Image: functionData.dockerImageWithTag,
@@ -64,5 +54,23 @@ describe('buildContainerOptions()', () => {
         NetworkMode: dockerNetwork,
       },
     });
+  });
+
+  it('should not set NetworkMode when dockerNetwork is not given', () => {
+    const functionData = {
+      name: 'GetResource',
+      environment: {
+        DB_NAME: 'test_database',
+        FEATURE_FLAG: '10%',
+      },
+      containerPort: 3001,
+      handler: 'GetResourceHandler.default',
+      dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+      distPath: '/Users/foo/api/dist',
+    };
+
+    const containerOptions = buildContainerOptions(functionData, { apiName });
+
+    expect(containerOptions.NetworkMode).toBeUndefined();
   });
 });

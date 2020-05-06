@@ -45,13 +45,13 @@ export default (docker) => {
       await Promise.all(promises);
       console.log('All required docker images have been pulled successfully.');
     },
-    createContainers: async (functions) => {
+    createContainers: async (functions, options) => {
       const promises = functions.map(async (fnData) => {
-        const options = buildContainerOptions(fnData);
+        const containerOptions = buildContainerOptions(fnData, options);
 
-        const container = await docker.createContainer(options);
+        const container = await docker.createContainer(containerOptions);
 
-        console.log('Starting container', { id: container.id, name: options.name, exposedPort: fnData.containerPort });
+        console.log('Starting container', { id: container.id, name: containerOptions.name, exposedPort: fnData.containerPort });
         await container.start();
 
         return container.id;

@@ -44,10 +44,8 @@ sam-proxy --help
 
 ## Roadmap
 
-- Make docker-network optional
 - Make env-vars optional
 - Rename pullRequiredDockerImages to pullImages and pass the distinc images array instead of the functions data
-- Send configuration to the dockerService calls instead of setting the variable at the environment
 - Use ES6 modules in bin file?
 - ...MVP...
 - Write README

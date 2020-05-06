@@ -23,26 +23,19 @@ const getRequiredDependencies = async (options) => {
   return { envVars, template };
 };
 
-const prepareEnvironment = async (dockerService, functions) => {
-  await Promise.all([
-    dockerService.removeApiContainers(process.env.API_NAME),
-    dockerService.pullRequiredDockerImages(functions),
-  ]);
-
-  await dockerService.createContainers(functions);
-};
-
 export default async (dockerService, options) => {
   const { template, envVars } = await getRequiredDependencies(options);
 
-  process.env.API_NAME = options.apiName;
-  process.env.DOCKER_NETWORK = options.dockerNetwork;
-
-  const port = Number(options.port);
+  const { apiName, basePath, port } = options;
   const portOffset = port + 1;
-  const functions = parseFunctionsFromTemplate(template, envVars, portOffset, options.basePath);
+  const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
-  await prepareEnvironment(dockerService, functions);
+  await Promise.all([
+    dockerService.removeApiContainers(apiName),
+    dockerService.pullRequiredDockerImages(functions),
+  ]);
 
-  spinUpServer(functions, port);
+  await dockerService.createContainers(functions, options);
+
+  spinUpServer(functions, port, apiName);
 };

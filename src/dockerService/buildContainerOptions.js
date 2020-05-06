@@ -2,7 +2,7 @@ import snakeCase from 'lodash.snakecase';
 
 export default ({
   name, environment, containerPort, handler, dockerImageWithTag, distPath,
-}) => ({
+}, { apiName, dockerNetwork }) => ({
   Image: dockerImageWithTag,
   name: `${snakeCase(name)}_lambda`,
   Cmd: [handler],
@@ -11,12 +11,12 @@ export default ({
     'DOCKER_LAMBDA_STAY_OPEN=1',
     ...Object.entries(environment).map(([key, value]) => `${key}=${value}`),
   ],
-  Labels: { 'aws-sam-api-proxy.api': process.env.API_NAME },
+  Labels: { 'aws-sam-api-proxy.api': apiName },
   ExposedPorts: { '9001/tcp': {} },
   Volumes: { '/var/task': {} },
   HostConfig: {
     Binds: [`${distPath}:/var/task:ro,delegated`],
     PortBindings: { '9001/tcp': [{ HostPort: `${containerPort}` }] },
-    NetworkMode: process.env.DOCKER_NETWORK,
+    ...(dockerNetwork !== undefined ? { NetworkMode: dockerNetwork } : {}),
   },
 });
