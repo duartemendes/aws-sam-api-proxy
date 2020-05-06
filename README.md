@@ -45,7 +45,6 @@ sam-proxy --help
 ## Roadmap
 
 - Write README
-- Set "files" on package.json
 - Publish alpha version to NPM
 - Push to GitHub
 - ...RELEASE DONE...
