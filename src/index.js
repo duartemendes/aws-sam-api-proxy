@@ -8,18 +8,20 @@ import spinUpServer from './server';
 const encoding = 'utf-8';
 const readFileAsync = promisify(readFile);
 
+const getEnvVars = async ({ envVars, basePath }) => {
+  if (envVars === undefined) return {};
+  const envVarsPath = path.join(basePath, envVars);
+  const envVarsString = await readFileAsync(envVarsPath, encoding);
+  return JSON.parse(envVarsString);
+};
+
+const getTemplate = async ({ basePath, template }) => {
+  const templatePath = path.join(basePath, template);
+  return readFileAsync(templatePath, encoding).then(parseSAMTemplate);
+};
+
 const getRequiredDependencies = async (options) => {
-  const envVarsPath = path.join(options.basePath, options.envVars);
-  const templatePath = path.join(options.basePath, options.template);
-
-  const [envVarsString, templateYaml] = await Promise.all([
-    readFileAsync(envVarsPath, encoding),
-    readFileAsync(templatePath, encoding),
-  ]);
-
-  const envVars = JSON.parse(envVarsString);
-  const template = await parseSAMTemplate(templateYaml);
-
+  const [envVars, template] = await Promise.all([getEnvVars(options), getTemplate(options)]);
   return { envVars, template };
 };
 

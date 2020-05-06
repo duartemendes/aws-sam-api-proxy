@@ -14,7 +14,7 @@ program
   .command('start <apiName>')
   .description('start an api')
   .requiredOption('-p, --port <port>', 'The port the server will run on')
-  .requiredOption('-n, --env-vars <envVars>', 'JSON file containing values for Lambda function\'s environment variables.')
+  .option('-n, --env-vars <envVars>', 'JSON file containing values for Lambda function\'s environment variables.')
   .option('-t, --template <template>', 'Relative path to the SAM template', 'template.yaml')
   .option('--docker-network <dockerNetwork>', 'The docker network you want your containers to connect to')
   .option('--base-path <basePath>', 'The base path of the API', process.cwd())

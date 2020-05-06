@@ -55,4 +55,11 @@ describe('index', () => {
     expect(spinUpServer).toHaveBeenCalledTimes(1);
     expect(spinUpServer).toHaveBeenCalledWith(functions, options.port, options.apiName);
   });
+
+  it('should set envVars as an empty object when no envVars path is given', async () => {
+    await startApi(dockerServiceStub, { ...options, envVars: undefined });
+
+    expect(parseFunctionsFromTemplate).toHaveBeenCalledTimes(1);
+    expect(parseFunctionsFromTemplate.mock.calls[0][1]).toEqual({});
+  });
 });
