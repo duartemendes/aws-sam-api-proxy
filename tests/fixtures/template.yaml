@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Resources API
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  EventBusName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /Test/EventBus/Name
+
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    MemorySize: 256
+    Timeout: 10
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Env
+        EVENT_BUS_NAME: !Ref EventBusName
+
+Resources:
+  GetResources:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: GetResourcesHandler.default
+      Events:
+        GetResourcesEvent:
+          Type: Api
+          Properties:
+            Path: /resources
+            Method: GET
+
+  GetResourceById:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: GetResourceByIdHandler.default
+      Events:
+        GetResourceByIdEvent:
+          Type: Api
+          Properties:
+            Path: /resources/{id}
+            Method: GET
+
+  CreateResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: CreateResourceHandler.default
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref EventBusName
+      Events:
+        CreateResourceEvent:
+          Type: Api
+          Properties:
+            Path: /resources
+            Method: POST
+
+  UpdateResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: UpdateResourceHandler.default
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref EventBusName
+      Events:
+        UpdateResourceEvent:
+          Type: Api
+          Properties:
+            Path: /resources/{id}
+            Method: PUT
+
+  DeleteResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./dist
+      Handler: DeleteResourceHandler.default
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref EventBusName
+      Events:
+        DeleteResourceEvent:
+          Type: Api
+          Properties:
+            Path: /resources/{id}
+            Method: DELETE
+
+Outputs:
+  ApiUrl:
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'

@@ -1,0 +1,22 @@
+{
+  "GetResources": {
+    "NODE_ENV": "test",
+    "EVENT_BUS_NAME": "test-event-bus"
+  },
+  "GetResourceById": {
+    "NODE_ENV": "test",
+    "EVENT_BUS_NAME": "test-event-bus"
+  },
+  "CreateResource": {
+    "NODE_ENV": "test",
+    "EVENT_BUS_NAME": "test-event-bus"
+  },
+  "UpdateResource": {
+    "NODE_ENV": "test",
+    "EVENT_BUS_NAME": "test-event-bus"
+  },
+  "DeleteResource": {
+    "NODE_ENV": "test",
+    "EVENT_BUS_NAME": "test-event-bus"
+  }
+}

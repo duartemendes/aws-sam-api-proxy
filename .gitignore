@@ -11,8 +11,5 @@ coverage
 ## macos
 .DS_Store
 
-## local
-fixtures
-
 ## distribution
 /dist
