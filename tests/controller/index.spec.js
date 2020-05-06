@@ -112,7 +112,10 @@ describe('controller', () => {
 
     await onEndCallback();
 
-    expect(res.writeHead).toHaveBeenCalledWith(upstreamResponse.statusCode, upstreamResponse.headers);
+    expect(res.writeHead).toHaveBeenCalledWith(
+      upstreamResponse.statusCode,
+      upstreamResponse.headers,
+    );
     expect(res.end).toHaveBeenCalledWith(upstreamResponse.body);
     expect(httpClientStub.post).toHaveBeenCalledTimes(1);
     const { containerPort } = functionsWithReplicatedValue[1];

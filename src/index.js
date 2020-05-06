@@ -25,6 +25,10 @@ const getRequiredDependencies = async (options) => {
   return { envVars, template };
 };
 
+const getDistinctDockerImages = (functions) => Array.from(new Set(
+  functions.map(({ dockerImageWithTag }) => dockerImageWithTag),
+));
+
 export default async (dockerService, options) => {
   const { template, envVars } = await getRequiredDependencies(options);
 
@@ -34,7 +38,7 @@ export default async (dockerService, options) => {
 
   await Promise.all([
     dockerService.removeApiContainers(apiName),
-    dockerService.pullRequiredDockerImages(functions),
+    dockerService.pullImages(getDistinctDockerImages(functions)),
   ]);
 
   await dockerService.createContainers(functions, options);

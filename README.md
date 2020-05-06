@@ -44,7 +44,6 @@ sam-proxy --help
 
 ## Roadmap
 
-- Rename pullRequiredDockerImages to pullImages and pass the distinc images array instead of the functions data
 - Use ES6 modules in bin file?
 - ...MVP...
 - Write README

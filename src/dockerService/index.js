@@ -20,15 +20,11 @@ export default (docker) => {
     },
     removeAllContainers: async () => removeContainers(LABEL_KEY),
     removeApiContainers: async (apiName) => removeContainers(`${LABEL_KEY}=${apiName}`),
-    pullRequiredDockerImages: async (functions) => {
-      const dockerImagesWithTag = functions
-        .map(({ dockerImageWithTag }) => dockerImageWithTag)
-        .filter((value, i, array) => array.indexOf(value) === i);
+    pullImages: async (images) => {
+      console.log('Pulling required docker images, this might take a while...', images);
 
-      console.log('Pulling required docker images, this might take a while...', dockerImagesWithTag);
-
-      const promises = dockerImagesWithTag.map((imageTag) => new Promise((resolve, reject) => {
-        docker.pull(imageTag, (pullErr, stream) => {
+      const promises = images.map((image) => new Promise((resolve, reject) => {
+        docker.pull(image, (pullErr, stream) => {
           if (pullErr) return reject(pullErr);
           const onFinished = (err, output) => {
           // eslint-disable-next-line no-unused-expressions

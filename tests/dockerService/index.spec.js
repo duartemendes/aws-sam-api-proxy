@@ -98,13 +98,15 @@ describe('dockerService', () => {
     });
   });
 
-  describe('pullRequiredDockerImages()', () => {
-    it('should pull only distinct docker images', async () => {
-      await dockerService.pullRequiredDockerImages(functions);
+  describe('pullImages()', () => {
+    it('should all given docker images', async () => {
+      const images = ['lambci/lambda:nodejs12.x', 'lambci/lambda:nodejs10.x'];
+
+      await dockerService.pullImages(images);
 
       expect(dockerStub.pull).toHaveBeenCalledTimes(2);
-      expect(dockerStub.pull.mock.calls[0][0]).toEqual('lambci/lambda:nodejs12.x');
-      expect(dockerStub.pull.mock.calls[1][0]).toEqual('lambci/lambda:nodejs10.x');
+      expect(dockerStub.pull.mock.calls[0][0]).toEqual(images[0]);
+      expect(dockerStub.pull.mock.calls[1][0]).toEqual(images[1]);
     });
   });
 

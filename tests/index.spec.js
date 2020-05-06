@@ -1,4 +1,3 @@
-import path from 'path';
 import startApi from '../src';
 import spinUpServer from '../src/server';
 import { parseFunctionsFromTemplate } from '../src/serverlessFunctions';
@@ -25,7 +24,7 @@ describe('index', () => {
 
     dockerServiceStub = {
       removeApiContainers: jest.fn(),
-      pullRequiredDockerImages: jest.fn(),
+      pullImages: jest.fn(),
       createContainers: jest.fn(),
     };
   });
@@ -38,7 +37,7 @@ describe('index', () => {
     jest.restoreAllMocks();
   });
 
-  it('should remove api containers, pull images, create the containers and spin up a server', async () => {
+  it('should remove api containers, pull distinct docker images, create the containers and spin up a server', async () => {
     await startApi(dockerServiceStub, options);
 
     expect(parseFunctionsFromTemplate).toHaveBeenCalledTimes(1);
@@ -46,8 +45,11 @@ describe('index', () => {
     expect(dockerServiceStub.removeApiContainers).toHaveBeenCalledTimes(1);
     expect(dockerServiceStub.removeApiContainers).toHaveBeenCalledWith(options.apiName);
 
-    expect(dockerServiceStub.pullRequiredDockerImages).toHaveBeenCalledTimes(1);
-    expect(dockerServiceStub.pullRequiredDockerImages).toHaveBeenCalledWith(functions);
+    expect(dockerServiceStub.pullImages).toHaveBeenCalledTimes(1);
+    expect(dockerServiceStub.pullImages).toHaveBeenCalledWith([
+      'lambci/lambda:nodejs12.x',
+      'lambci/lambda:nodejs10.x',
+    ]);
 
     expect(dockerServiceStub.createContainers).toHaveBeenCalledTimes(1);
     expect(dockerServiceStub.createContainers).toHaveBeenCalledWith(functions, options);
