@@ -51,10 +51,10 @@ export default (httpClient, functions) => (req, res) => {
     const startDate = new Date();
     const upstreamResponse = await httpClient.post(urlToCall, { json: event }).json();
 
-    const requestDurationInMs = new Date() - startDate;
-    console.log(`[${id}] Http request to lambda function took ${requestDurationInMs} ms`);
-
     const { statusCode, headers: resHeaders, body: resBody } = upstreamResponse;
+    const requestDurationInMs = new Date() - startDate;
+    console.log(`[${id}] Lambda responded with ${statusCode} status code and took ${requestDurationInMs} ms`);
+
     if (upstreamResponse.errorType === 'Error') {
       return sendError(502, upstreamResponse.errorMessage);
     }

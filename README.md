@@ -44,15 +44,14 @@ sam-proxy --help
 
 ## Roadmap
 
-- Log upstream response code
 - Use CodeUri over DIST_PATH env var & fallback function handler to Globals.Handler
 - Create BASE_PATH variable (default to __dirname?) to avoid have to specify the entire path in 3 variables
-- Use ES6 modules in bin file
 - Rename pullRequiredDockerImages to pullImages and pass the distinc images array instead of the functions data
 - Send configuration to the dockerService calls instead of setting the variable at the environment
 - Make docker-network optional
 - Make env-vars optional
 - Set default for template option
+- Use ES6 modules in bin file?
 - ...MVP...
 - Write README
 - Set "files" on package.json
