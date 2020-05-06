@@ -5,7 +5,7 @@ const LABEL_KEY = 'aws-sam-api-proxy.api';
 export default (docker) => {
   const removeContainers = async (label) => {
     const containersData = await docker.listContainers({ all: true, filters: { label: [label] } });
-    console.log(`Found ${containersData.length} containers for this api, removing...`);
+    console.log(`Found ${containersData.length} containers, removing...`);
 
     const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
     return Promise.all(containers.map((container) => container.remove({ force: true })));

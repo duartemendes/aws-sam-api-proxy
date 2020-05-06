@@ -4,15 +4,14 @@
   "description": "AWS SAM API Proxy CLI",
   "main": "index.js",
   "bin": {
-    "aws-sam-api-proxy": "./bin/index.js",
-    "sam-proxy": "./bin/index.js"
+    "sam-proxy": "./dist/cli.js"
   },
   "scripts": {
     "dev": "babel-node index.js",
     "test": "jest --coverage",
     "lint": "eslint 'src/**/*.js'",
     "lint:tests": "eslint 'tests/**/*.spec.js'",
-    "build": "babel src --out-dir dist",
+    "build": "rimraf dist && babel src bin --out-dir dist",
     "release": "standard-version"
   },
   "author": "Duarte Mendes <duartecostamendes@gmail.com>",
@@ -34,6 +33,7 @@
     "eslint-plugin-import": "^2.20.2",
     "husky": "^4.2.5",
     "jest": "^25.5.3",
+    "rimraf": "^3.0.2",
     "standard-version": "^7.1.0"
   },
   "dependencies": {

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-const { program } = require('commander');
-const Docker = require('dockerode');
-const { version } = require('../package.json');
-const createDockerService = require('../dist/dockerService').default;
-const startApi = require('../dist').default;
+import { program } from 'commander';
+import Docker from 'dockerode';
+import { version } from '../package.json';
+import createDockerService from '../dist/dockerService';
+import startApi from '../dist';
 
 const dockerService = createDockerService(new Docker());
 

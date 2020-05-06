@@ -44,8 +44,6 @@ sam-proxy --help
 
 ## Roadmap
 
-- Use ES6 modules in bin file?
-- ...MVP...
 - Write README
 - Set "files" on package.json
 - Publish alpha version to NPM
