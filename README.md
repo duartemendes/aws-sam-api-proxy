@@ -44,7 +44,6 @@ sam-proxy --help
 
 ## Roadmap
 
-- Set default for template option
 - Make docker-network optional
 - Make env-vars optional
 - Rename pullRequiredDockerImages to pullImages and pass the distinc images array instead of the functions data
