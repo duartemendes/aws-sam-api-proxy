@@ -165,8 +165,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 
 ## Roadmap
 
-- Publish alpha version to NPM
-- ...RELEASE DONE...
 - Setup CI/CD
 - Refactor buildContainerOptions.js to serverlessFunctions folder
 - Support JSON template
