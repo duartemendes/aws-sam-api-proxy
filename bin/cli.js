@@ -42,7 +42,7 @@ program
   });
 
 program
-  .command('cleanup <apiName>')
+  .command('teardown <apiName>')
   .description('Remove api leftovers - i.e. docker containers created by this tool (identifiable by a label)')
   .action(async (apiName) => {
     await dockerService.validateDockerStatus();
@@ -52,7 +52,7 @@ program
   });
 
 program
-  .command('cleanup-all')
+  .command('teardown-all')
   .description('Remove all api leftovers - i.e. docker containers created by this tool (identifiable by a label)')
   .action(async () => {
     await dockerService.validateDockerStatus();

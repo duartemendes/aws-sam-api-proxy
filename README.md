@@ -18,18 +18,18 @@ npm i aws-sam-api-proxy -g
 sam-proxy start my-api --port 3000 --template ./template.yaml --dist-path ./dist --env-vars ./fixtures/envVars.json --docker-network my_network
 ```
 
-### Cleaning up the house
+### Tearing down the house
 
 #### For a specific API
 
 ```bash
-sam-proxy cleanup my-api
+sam-proxy teardown my-api
 ```
 
 #### For all APIs
 
 ```bash
-sam-proxy cleanup-all
+sam-proxy teardown-all
 ```
 
 ### More
@@ -49,6 +49,7 @@ sam-proxy --help
 - Push to GitHub
 - ...RELEASE DONE...
 - Setup CI/CD
+- Refactor buildContainerOptions.js to serverlessFunctions folder
 - Support JSON template
 - Log levels
 - Lambda timeouts
