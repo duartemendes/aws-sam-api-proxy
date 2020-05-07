@@ -165,7 +165,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 
 ## Roadmap
 
-- Push to GitHub
 - Publish alpha version to NPM
 - ...RELEASE DONE...
 - Setup CI/CD

@@ -2,7 +2,6 @@
   "name": "aws-sam-api-proxy",
   "version": "0.0.1",
   "description": "AWS SAM API Proxy CLI",
-  "main": "index.js",
   "bin": {
     "sam-proxy": "./dist/cli.js"
   },
@@ -16,9 +15,10 @@
   },
   "author": "Duarte Mendes <duartecostamendes@gmail.com>",
   "license": "ISC",
+  "homepage": "https://github.com/duartemendes/aws-sam-api-proxy",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/duartemendes/aws-sam-api-proxy.git"
   },
   "files": [
     "dist"
