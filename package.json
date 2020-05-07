@@ -2,6 +2,7 @@
   "name": "aws-sam-api-proxy",
   "version": "0.0.2",
   "description": "AWS SAM API Proxy CLI",
+  "keywords": ["aws", "sam", "lambda", "api-gateway", "proxy"],
   "bin": {
     "sam-proxy": "./dist/cli.js"
   },

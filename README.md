@@ -61,22 +61,6 @@ Or, with all the options available:
 sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network
 ```
 
-### Running multiple APIs
-
-If you pretend to run multiple APIs, the only detail to take in consideration is the PORT.
-
-Make sure to leave a minimum range of 10 ports between each api, depending on the amount of functions your template has.
-
-Why? Because all containers created by this tool will expose a port that is based on the port you provided.
-
-#### Example
-
-Imagine your API has 4 endpoints and you want your server to run at port 3000.
-
-4 containers will be created, the following ports will be used: 3001, 3002, 3003 and 3004.
-
-What you need to do, on the next APIs, is to select an higher port. For this example, 3005 would be enough.
-
 ### Tearing down the house
 
 #### For a specific API
@@ -96,6 +80,20 @@ sam-proxy teardown-all
 ```bash
 sam-proxy --help
 ```
+
+### Running multiple APIs
+
+If you pretend to run multiple APIs, the only detail to take in consideration is the port you run your server on.
+
+Why? All containers created by this tool will expose a port that is based on the server port.
+
+Example:
+
+Imagine your API has 4 endpoints and your server is running at port 3000.
+
+4 containers are running, the following ports are being used: 3001, 3002, 3003 and 3004.
+
+What you need to do, on the subsequent server, is to select an higher port. For this example, 3005 would be enough.
 
 ## Template sample
 
