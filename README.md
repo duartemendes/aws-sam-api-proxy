@@ -1,23 +1,25 @@
 # aws-sam-api-proxy 🚀
 
-User and advocate of [SAM](https://github.com/awslabs/serverless-application-model)?
+User and advocate of [SAM](https://github.com/awslabs/serverless-application-model)? Improve development of API based Lambdas.
 
-Buckle up and improve development of Lambdas and API Gateways... Execute your HTTP requests locally without experiencing **cold starts** and taking advantage of **context reusability**!
+Execute your HTTP requests locally without hitting **cold starts** every time!
 
-Spin up a local server for your API, any request will be redirected to the expected lambda according to the received path and method.
+It's like running `sam local start-api` but keeping the containers (functions) around.
+
+This tool will spin up a local server and proxy any incoming request to the expected lambda, [here's how](#under-the-hood).
 
 ## Features
 
 - No cold starts on every request
-  - first request to an endpoint might take more than one second
+  - in the first request a cold start is experienced, just like in the AWS environment
   - subsequent requests are as fast as your code! 🏃‍♂️
 - Context reutilization
+- Always watching your distribution folder - rebuild your code and changes are propagated immediately
 - Automatic discoverability of your Lambda functions
   - Global CodeUri, Runtime and Handlers are supported
   - Environment variables are passed through and can be overridden with `--env-vars`
   - All runtimes are supported
 - Path parameters, querystring, body and headers are all passed through the request, with no changes
-- Always watching your distribution folder - rebuild your code and changes are propagated immediately
 - Already supports Http Apis
 
 ## Motivation
@@ -33,6 +35,8 @@ Another issue me and my team face, is that our APIs are behind a GraqhQL server.
 With this tool all this pain went away and I'm able to test my APIs much faster 😍
 
 I hope somehow this tool is of any help to you. If you find a bug just open an issue or go ahead and fix it.
+
+For more context you can read through [aws-sam-cli/issues/239](https://github.com/awslabs/aws-sam-cli/issues/239) and understand what led me to write this tool.
 
 ## Requirements
 
@@ -83,7 +87,7 @@ sam-proxy --help
 
 ### Running multiple APIs
 
-If you pretend to run multiple APIs, the only detail to take in consideration is the port you run your server on.
+If you want to **run multiple APIs**, the only detail to take in consideration is the port you choose to run your server on.
 
 Why? All containers created by this tool will expose a port that is based on the server port.
 
@@ -144,13 +148,15 @@ Very succinctly, this tool does the following:
 3. Remove containers running for this API
 4. Pull necessary docker images
 5. Create and start containers for each Lambda function with the given environment variables
-6. Spins up a server that acts as an API Gateway, redirecting each request to the expected container
+6. Spins up a server that acts as an API Gateway, proxying incoming requests to the expected containers
+
+Keeping containers warm is possible due to the environment variable [DOCKER_LAMBDA_STAY_OPEN](https://github.com/lambci/docker-lambda#running-in-stay-open-api-mode) that is given to the container on creation.
 
 ## Logs
 
-This server will automatically log requests details and responses status code and duration.
+This tool will automatically log request details, duration and response status code.
 
-If you want to check the logs of a function, just take a peek at the container logs:
+If you want to check the logs of a function, just take a look at the container logs:
 
 ```bash
 docker ps
