@@ -11,8 +11,8 @@ This tool will spin up a local server and proxy any incoming request to the expe
 ## Features
 
 - No cold starts on every request
-  - in the first request a cold start is experienced, just like in the AWS environment
-  - subsequent requests are as fast as your code! 🏃‍♂️
+  - in the first invocation a cold start is experienced, just like in the AWS environment
+  - subsequent invocations are as fast as your code! 🏃‍♂️
 - Context reutilization
 - Always watching your distribution folder - rebuild your code and changes are propagated immediately
 - Automatic discoverability of your Lambda functions
