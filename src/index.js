@@ -3,6 +3,7 @@ import { readFile } from 'fs';
 import { promisify } from 'util';
 import parseSAMTemplate from './parseSAMTemplate';
 import { parseFunctionsFromTemplate } from './serverlessFunctions';
+import { buildContainerOptions } from './docker';
 import spinUpServer from './server';
 
 const encoding = 'utf-8';
@@ -41,7 +42,8 @@ export default async (dockerService, options) => {
     dockerService.pullImages(getDistinctDockerImages(functions)),
   ]);
 
-  await dockerService.createContainers(functions, options);
+  const containersOptions = functions.map((f) => buildContainerOptions(f, options));
+  await dockerService.createContainers(containersOptions);
 
   spinUpServer(functions, port, apiName);
 };

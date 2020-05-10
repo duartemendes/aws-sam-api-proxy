@@ -170,7 +170,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 ## Roadmap
 
 - Setup CI/CD
-- Refactor buildContainerOptions.js to serverlessFunctions folder
 - Support JSON template
 - Log levels
 - Lambda timeouts

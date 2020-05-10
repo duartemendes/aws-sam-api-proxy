@@ -3,7 +3,7 @@
 import { program } from 'commander';
 import Docker from 'dockerode';
 import { version } from '../package.json';
-import createDockerService from '../dist/dockerService';
+import { createDockerService } from '../dist/docker';
 import startApi from '../dist';
 
 const dockerService = createDockerService(new Docker());

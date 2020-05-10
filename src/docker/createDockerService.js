@@ -1,5 +1,3 @@
-import buildContainerOptions from './buildContainerOptions';
-
 const LABEL_KEY = 'aws-sam-api-proxy.api';
 
 export default (docker) => {
@@ -41,13 +39,11 @@ export default (docker) => {
       await Promise.all(promises);
       console.log('All required docker images have been pulled successfully.');
     },
-    createContainers: async (functions, options) => {
-      const promises = functions.map(async (fnData) => {
-        const containerOptions = buildContainerOptions(fnData, options);
-
+    createContainers: async (containersOptions) => {
+      const promises = containersOptions.map(async (containerOptions) => {
         const container = await docker.createContainer(containerOptions);
 
-        console.log('Starting container', { id: container.id, name: containerOptions.name, exposedPort: fnData.containerPort });
+        console.log('Starting container', { id: container.id, name: containerOptions.name });
         await container.start();
 
         return container.id;

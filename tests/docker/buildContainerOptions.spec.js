@@ -1,4 +1,4 @@
-import buildContainerOptions from '../../src/dockerService/buildContainerOptions';
+import { buildContainerOptions } from '../../src/docker';
 
 describe('buildContainerOptions()', () => {
   const apiName = 'test-api';
@@ -42,7 +42,7 @@ describe('buildContainerOptions()', () => {
       },
       HostConfig: {
         Binds: [
-          `${functionData.distPath}:/var/task/ro,delegated`,
+          `${functionData.distPath}:/var/task:ro,delegated`,
         ],
         PortBindings: {
           '9001/tcp': [

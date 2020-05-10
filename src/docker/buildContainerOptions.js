@@ -1,8 +1,13 @@
 import snakeCase from 'lodash.snakecase';
 
-export default ({
-  name, environment, containerPort, handler, dockerImageWithTag, distPath,
-}, { apiName, dockerNetwork }) => ({
+export default (
+  {
+    name, environment, containerPort, handler, dockerImageWithTag, distPath,
+  },
+  {
+    apiName, dockerNetwork,
+  },
+) => ({
   Image: dockerImageWithTag,
   name: `${snakeCase(name)}_lambda`,
   Cmd: [handler],

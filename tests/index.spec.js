@@ -1,6 +1,7 @@
 import startApi from '../src';
 import spinUpServer from '../src/server';
 import { parseFunctionsFromTemplate } from '../src/serverlessFunctions';
+import { buildContainerOptions } from '../src/docker';
 import functions from './fixtures/functions';
 
 jest.mock('../src/server.js');
@@ -52,7 +53,9 @@ describe('index', () => {
     ]);
 
     expect(dockerServiceStub.createContainers).toHaveBeenCalledTimes(1);
-    expect(dockerServiceStub.createContainers).toHaveBeenCalledWith(functions, options);
+    expect(dockerServiceStub.createContainers).toHaveBeenCalledWith(
+      functions.map((fn) => buildContainerOptions(fn, options)),
+    );
 
     expect(spinUpServer).toHaveBeenCalledTimes(1);
     expect(spinUpServer).toHaveBeenCalledWith(functions, options.port, options.apiName);

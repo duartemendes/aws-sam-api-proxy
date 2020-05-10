@@ -1,4 +1,4 @@
-import createDockerService from '../../src/dockerService';
+import { createDockerService } from '../../src/docker';
 import functions from '../fixtures/functions';
 
 describe('dockerService', () => {
@@ -112,11 +112,17 @@ describe('dockerService', () => {
 
   describe('createContainers()', () => {
     it('should create and start one container per function', async () => {
-      const containersIds = await dockerService.createContainers(functions, { apiName });
+      const containersOptions = [
+        { Image: 'lambci/lambda:nodejs12.x' },
+        { Image: 'lambci/lambda:nodejs12.x' },
+        { Image: 'lambci/lambda:nodejs12.x' },
+      ];
 
-      expect(containersIds).toHaveLength(functions.length);
-      expect(dockerStub.createContainer).toHaveBeenCalledTimes(functions.length);
-      expect(startContainerMock).toHaveBeenCalledTimes(functions.length);
+      const containersIds = await dockerService.createContainers(containersOptions);
+
+      expect(containersIds).toHaveLength(containersOptions.length);
+      expect(dockerStub.createContainer).toHaveBeenCalledTimes(containersOptions.length);
+      expect(startContainerMock).toHaveBeenCalledTimes(containersOptions.length);
     });
   });
 });
