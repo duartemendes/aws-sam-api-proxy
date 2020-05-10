@@ -56,6 +56,8 @@ describe('parseFromTemplate()', () => {
             CodeUri: './dist',
             Handler: 'GetSomethingHandler.default',
             Runtime: 'nodejs12.x',
+            MemorySize: 256,
+            Timeout: 10,
             Events: {
               GetSomethingEvent: {
                 Type: 'Api',
@@ -76,6 +78,8 @@ describe('parseFromTemplate()', () => {
     expect(functions[0]).toEqual({
       name: 'GetSomething',
       handler: 'GetSomethingHandler.default',
+      memorySize: 256,
+      timeout: 10,
       event: {
         type: 'Api',
         payloadFormatVersion: undefined,
@@ -158,13 +162,15 @@ describe('parseFromTemplate()', () => {
     expect(functions).toHaveLength(2);
   });
 
-  it('should fallback to global Runtime, CodeUri and Handler when function is missing it', () => {
+  it('should fallback to globals when function is missing properties', () => {
     const template = {
       Globals: {
         Function: {
           Runtime: 'nodejs10.x',
           CodeUri: './dist',
           Handler: 'GetResourcesHandler.default',
+          MemorySize: 256,
+          Timeout: 10,
         },
       },
       Resources: {
@@ -187,9 +193,13 @@ describe('parseFromTemplate()', () => {
 
     const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
-    expect(functions[0].dockerImageWithTag).toEqual('lambci/lambda:nodejs10.x');
-    expect(functions[0].distPath).toEqual('/Users/foo/api/dist');
-    expect(functions[0].handler).toEqual('GetResourcesHandler.default');
+    expect(functions[0]).toMatchObject({
+      dockerImageWithTag: 'lambci/lambda:nodejs10.x',
+      distPath: '/Users/foo/api/dist',
+      handler: 'GetResourcesHandler.default',
+      memorySize: 256,
+      timeout: 10,
+    });
   });
 
   it('should provide payloadFormatVersion when event is of type HttpApi', () => {

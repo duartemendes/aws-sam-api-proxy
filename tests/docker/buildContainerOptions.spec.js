@@ -13,6 +13,8 @@ describe('buildContainerOptions()', () => {
       },
       containerPort: 3001,
       handler: 'GetResourceHandler.default',
+      memorySize: 256,
+      timeout: 10,
       dockerImageWithTag: 'lambci/lambda:nodejs12.x',
       distPath: '/Users/foo/api/dist',
     };
@@ -26,6 +28,8 @@ describe('buildContainerOptions()', () => {
         functionData.handler,
       ],
       Env: [
+        'AWS_LAMBDA_FUNCTION_MEMORY_SIZE=256',
+        'AWS_LAMBDA_FUNCTION_TIMEOUT=10',
         'DOCKER_LAMBDA_WATCH=1',
         'DOCKER_LAMBDA_STAY_OPEN=1',
         'DB_NAME=test_database',

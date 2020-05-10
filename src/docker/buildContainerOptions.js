@@ -2,7 +2,7 @@ import snakeCase from 'lodash.snakecase';
 
 export default (
   {
-    name, environment, containerPort, handler, dockerImageWithTag, distPath,
+    name, environment, containerPort, handler, memorySize, timeout, dockerImageWithTag, distPath,
   },
   {
     apiName, dockerNetwork,
@@ -12,6 +12,8 @@ export default (
   name: `${snakeCase(name)}_lambda`,
   Cmd: [handler],
   Env: [
+    `AWS_LAMBDA_FUNCTION_MEMORY_SIZE=${memorySize}`,
+    `AWS_LAMBDA_FUNCTION_TIMEOUT=${timeout}`,
     'DOCKER_LAMBDA_WATCH=1',
     'DOCKER_LAMBDA_STAY_OPEN=1',
     ...Object.entries(environment).map(([key, value]) => `${key}=${value}`),

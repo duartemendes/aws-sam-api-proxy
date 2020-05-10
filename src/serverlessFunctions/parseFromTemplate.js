@@ -26,18 +26,22 @@ export default (template, envVars, portOffset, basePath) => {
     .filter(([_, resource]) => isServerlessFunction(resource) && hasApiEvent(resource))
     .reduce((result, [name, resource], i) => {
       const {
-        Events, Handler, Runtime, CodeUri,
+        Events,
+        Handler: handler = functionGlobals.Handler,
+        Runtime: runtime = functionGlobals.Runtime,
+        CodeUri: codeUri = functionGlobals.CodeUri,
+        MemorySize: memorySize = functionGlobals.MemorySize,
+        Timeout: timeout = functionGlobals.Timeout,
       } = resource.Properties;
 
-      const runtime = Runtime ?? functionGlobals.Runtime;
-      const codeUri = CodeUri ?? functionGlobals.CodeUri;
-      const handler = Handler ?? functionGlobals.Handler;
       const apiEvent = Object.values(Events).find(isApiEvent);
       const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
 
       return result.concat({
         name,
         handler,
+        memorySize,
+        timeout,
         event: {
           type: Type,
           payloadFormatVersion: PayloadFormatVersion,

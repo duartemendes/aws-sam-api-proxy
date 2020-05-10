@@ -172,8 +172,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 - Setup CI/CD
 - Support JSON template
 - Log levels
-- Lambda timeouts
-- Lambda memory size
 - Fill events missing data:
   - requestContext
   - multiValueHeaders

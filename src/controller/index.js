@@ -55,7 +55,7 @@ export default (httpClient, functions) => (req, res) => {
     const requestDurationInMs = new Date() - startDate;
     console.log(`[${id}] Lambda responded with ${statusCode} status code and took ${requestDurationInMs} ms`);
 
-    if (upstreamResponse.errorType === 'Error') {
+    if (upstreamResponse.errorMessage !== undefined) {
       return sendError(502, upstreamResponse.errorMessage);
     }
 

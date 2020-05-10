@@ -63,9 +63,8 @@ describe('controller', () => {
     expect(httpClientStub.post).toHaveBeenCalled();
   });
 
-  it('should return 502 when upstream return an error', async () => {
+  it('should return 502 when upstream returns an error', async () => {
     const upstreamResponse = {
-      errorType: 'Error',
       errorMessage: 'Failed to initialize handler',
     };
     httpClientStub.post.mockReturnValueOnce({
