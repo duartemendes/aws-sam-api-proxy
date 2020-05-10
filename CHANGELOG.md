@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.4...v0.0.5) (2020-05-10)
+
+
+### Features
+
+* support memory size and timeout ([a4162e9](https://github.com/duartemendes/aws-sam-api-proxy/commit/a4162e98816f13a6460acbf477f815a01129a2c2))
+
 ### [0.0.4](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.3...v0.0.4) (2020-05-09)
 
 ### [0.0.3](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.2...v0.0.3) (2020-05-07)
