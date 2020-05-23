@@ -47,7 +47,7 @@ export default [
         },
       ],
     },
-    containerPort: 3002,
+    containerPort: 3003,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs10.x',
   },
@@ -66,7 +66,26 @@ export default [
         },
       ],
     },
-    containerPort: 3003,
+    containerPort: 3004,
+    environment: {},
+    dockerImageWithTag: 'lambci/lambda:nodejs10.x',
+  },
+  {
+    method: 'any',
+    path: {
+      full: '/other-resource/{proxy+}',
+      splitted: [
+        {
+          isParameter: false,
+          data: 'other-resource',
+        },
+        {
+          isParameter: true,
+          data: 'proxy+',
+        },
+      ],
+    },
+    containerPort: 3005,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs10.x',
   },

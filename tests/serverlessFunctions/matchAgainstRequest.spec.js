@@ -32,8 +32,7 @@ describe('matchFunctionAgainstRequest()', () => {
 
     const matchedFunctions = matchFunctionsAgainstRequest(functions, request);
 
-    expect(matchedFunctions).toHaveLength(1);
-    expect(matchedFunctions[0]).toEqual(functions[1]);
+    expect(matchedFunctions).toEqual([functions[1]]);
   });
 
   it('should return all matches when there are multiple functions for given method and path', () => {
@@ -45,5 +44,16 @@ describe('matchFunctionAgainstRequest()', () => {
     const matchedFunctions = matchFunctionsAgainstRequest(functions.concat(functions[0]), request);
 
     expect(matchedFunctions).toHaveLength(2);
+  });
+
+  it('should return match when there is a function for given path with ANY method', () => {
+    const request = {
+      path: '/other-resource/sub-resource',
+      method: 'TRACE',
+    };
+
+    const matchedFunctions = matchFunctionsAgainstRequest(functions, request);
+
+    expect(matchedFunctions).toEqual([functions[4]]);
   });
 });
