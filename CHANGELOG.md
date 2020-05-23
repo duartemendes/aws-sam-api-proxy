@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.5...v0.0.6) (2020-05-23)
+
+
+### Features
+
+* support ANY method ([f501d32](https://github.com/duartemendes/aws-sam-api-proxy/commit/f501d32d464c631dd6aa9d75e2548d4db4f8a8c4)), closes [#2](https://github.com/duartemendes/aws-sam-api-proxy/issues/2)
+
 ### [0.0.5](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.4...v0.0.5) (2020-05-10)
 
 
