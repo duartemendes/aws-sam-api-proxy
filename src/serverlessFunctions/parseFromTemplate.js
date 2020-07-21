@@ -2,7 +2,6 @@ import { join } from 'path';
 
 const isServerlessFunction = ({ Type }) => Type === 'AWS::Serverless::Function';
 const isApiEvent = ({ Type }) => Type.includes('Api');
-const hasApiEvent = ({ Properties }) => Object.values(Properties?.Events ?? {}).some(isApiEvent);
 
 const buildFnPathData = (path) => {
   const splittedPath = path.slice(1).split('/');
@@ -23,10 +22,15 @@ export default (template, envVars, portOffset, basePath) => {
 
   return Object.entries(template.Resources)
     // eslint-disable-next-line no-unused-vars
-    .filter(([_, resource]) => isServerlessFunction(resource) && hasApiEvent(resource))
+    .filter(([_, resource]) => isServerlessFunction(resource))
+    .flatMap(([name, resource]) => Object.values(resource.Properties?.Events ?? {})
+      .filter(isApiEvent)
+      .map((ApiEvent, i, apiEvents) => [
+        name + (apiEvents.length > 1 ? `_${i}` : ''),
+        { ApiEvent, ...resource },
+      ]))
     .reduce((result, [name, resource], i) => {
       const {
-        Events,
         Handler: handler = functionGlobals.Handler,
         Runtime: runtime = functionGlobals.Runtime,
         CodeUri: codeUri = functionGlobals.CodeUri,
@@ -34,8 +38,7 @@ export default (template, envVars, portOffset, basePath) => {
         Timeout: timeout = functionGlobals.Timeout,
       } = resource.Properties;
 
-      const apiEvent = Object.values(Events).find(isApiEvent);
-      const { Type, Properties: { Path, Method, PayloadFormatVersion } } = apiEvent;
+      const { Type, Properties: { Path, Method, PayloadFormatVersion } } = resource.ApiEvent;
 
       return result.concat({
         name,

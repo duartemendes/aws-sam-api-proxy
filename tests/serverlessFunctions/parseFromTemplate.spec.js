@@ -230,4 +230,60 @@ describe('parseFromTemplate()', () => {
 
     expect(functions[0].event.payloadFormatVersion).toEqual('2.0');
   });
+
+  it('should return functions with multiple events', () => {
+    const template = {
+      Resources: {
+        Greeting: {
+          Type: 'AWS::Serverless::Function',
+          Properties: {
+            CodeUri: './dist',
+            Handler: 'GreetHandler.default',
+            Runtime: 'nodejs12.x',
+            Events: {
+              APIWithName: {
+                Type: 'Api',
+                Properties: {
+                  Path: '/hello/byname/{name}',
+                  Method: 'GET',
+                },
+              },
+              APIAnonymous: {
+                Type: 'Api',
+                Properties: {
+                  Path: '/hello',
+                  Method: 'GET',
+                },
+              },
+            },
+          },
+        },
+        GetResources: {
+          Type: 'AWS::Serverless::Function',
+          Properties: {
+            CodeUri: './dist',
+            Handler: 'GetResourcesHandler.default',
+            Runtime: 'nodejs12.x',
+            Events: {
+              GetResourcesEvent: {
+                Type: 'Api',
+                Properties: {
+                  Path: '/resources',
+                  Method: 'GET',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
+
+    expect(functions).toMatchObject([
+      { name: 'Greeting_0', containerPort: 3001, handler: 'GreetHandler.default' },
+      { name: 'Greeting_1', containerPort: 3002, handler: 'GreetHandler.default' },
+      { name: 'GetResources', containerPort: 3003, handler: 'GetResourcesHandler.default' },
+    ]);
+  });
 });
