@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.6...v0.0.7) (2020-07-21)
+
+
+### Features
+
+* support for multiple events within a single function ([#6](https://github.com/duartemendes/aws-sam-api-proxy/issues/6)) ([adab46e](https://github.com/duartemendes/aws-sam-api-proxy/commit/adab46ed8074863ef26d4bab37f739f274471489))
+
 ### [0.0.6](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.5...v0.0.6) (2020-05-23)
 
 
