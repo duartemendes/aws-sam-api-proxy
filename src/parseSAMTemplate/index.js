@@ -1,8 +1,3 @@
-import yaml from 'js-yaml';
+import { yamlParse } from 'yaml-cfn';
 
-const sanitizeTemplate = (templateYaml) => templateYaml.replace(/!/g, '');
-
-export default async (templateYaml) => {
-  const sanitizedTemplateYaml = sanitizeTemplate(templateYaml);
-  return yaml.safeLoad(sanitizedTemplateYaml);
-};
+export default async (templateYaml) => yamlParse(templateYaml);

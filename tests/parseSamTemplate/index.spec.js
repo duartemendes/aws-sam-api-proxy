@@ -14,5 +14,9 @@ describe('parseSAMTemplate()', () => {
 
     expect(template.Description).toEqual('Resources API');
     expect(template.Resources).toBeDefined();
+    expect(template.Globals.Function.Environment.Variables).toMatchObject({
+      NODE_ENV: { Ref: 'Env' },
+      EVENT_BUS_NAME: { Ref: 'EventBusName' },
+    });
   });
 });

@@ -3,6 +3,12 @@ import { join } from 'path';
 const isServerlessFunction = ({ Type }) => Type === 'AWS::Serverless::Function';
 const isApiEvent = ({ Type }) => Type.includes('Api');
 
+const resolveEnvValue = (parameters) => (val) => (typeof val === 'object' && 'Ref' in val ? parameters[val.Ref] || val.Ref : val);
+const mapValues = (f, env) => Object.keys(env).reduce((curr, k) => ({
+  ...curr,
+  [k]: f(env[k]),
+}), {});
+
 const buildFnPathData = (path) => {
   const splittedPath = path.slice(1).split('/');
   const splittedData = splittedPath.map((part) => {
@@ -17,7 +23,7 @@ const buildFnPathData = (path) => {
   };
 };
 
-export default (template, envVars, portOffset, basePath) => {
+export default (template, envVars, portOffset, basePath, parameters = {}) => {
   const functionGlobals = template?.Globals?.Function ?? {};
 
   return Object.entries(template.Resources)
@@ -40,11 +46,21 @@ export default (template, envVars, portOffset, basePath) => {
 
       const { Type, Properties: { Path, Method, PayloadFormatVersion } } = resource.ApiEvent;
 
+      const environment = mapValues(
+        resolveEnvValue(parameters),
+        {
+          ...functionGlobals.Environment?.Variables,
+          ...resource.Properties.Environment?.Variables,
+          ...envVars[name],
+        },
+      );
+
       return result.concat({
         name,
         handler,
         memorySize,
         timeout,
+        environment,
         event: {
           type: Type,
           payloadFormatVersion: PayloadFormatVersion,
@@ -52,7 +68,6 @@ export default (template, envVars, portOffset, basePath) => {
         path: buildFnPathData(Path),
         method: Method.toLowerCase(),
         containerPort: portOffset + i,
-        environment: envVars[name] ?? {},
         dockerImageWithTag: `lambci/lambda:${runtime}`,
         distPath: join(basePath, codeUri),
       });
