@@ -1,7 +1,7 @@
 import path from 'path';
 import { readFile } from 'fs';
 import { promisify } from 'util';
-import parseSAMTemplate from './parseSAMTemplate';
+import { yamlParse } from 'yaml-cfn';
 import { parseFunctionsFromTemplate } from './serverlessFunctions';
 import { buildContainerOptions } from './docker';
 import spinUpServer from './server';
@@ -18,7 +18,7 @@ const getEnvVars = async ({ envVars, basePath }) => {
 
 const getTemplate = async ({ basePath, template }) => {
   const templatePath = path.join(basePath, template);
-  return readFileAsync(templatePath, encoding).then(parseSAMTemplate);
+  return readFileAsync(templatePath, encoding).then(yamlParse);
 };
 
 const getRequiredDependencies = async (options) => {
