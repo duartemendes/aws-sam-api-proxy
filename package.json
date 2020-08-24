@@ -1,6 +1,6 @@
 {
   "name": "aws-sam-api-proxy",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "AWS SAM API Proxy CLI",
   "keywords": [
     "aws",
