@@ -68,7 +68,7 @@ describe('index', () => {
     expect(parseFunctionsFromTemplate.mock.calls[0][1]).toEqual({});
   });
 
-  it('should parse parameters correctly', async () => {
+  it('should parse ref-overrides correctly', async () => {
     await startApi(dockerServiceStub, { ...options, refOverrides: 'A=1,B=two,API_KEY=tok_1234' });
 
     expect(parseFunctionsFromTemplate).toHaveBeenCalledTimes(1);
