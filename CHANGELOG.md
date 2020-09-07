@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.15](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.14...v0.0.15) (2020-09-07)
+
+
+### Features
+
+* Resolve environment variables using Ref and --ref-overrides ([#9](https://github.com/duartemendes/aws-sam-api-proxy/issues/9)) ([8f8060a](https://github.com/duartemendes/aws-sam-api-proxy/commit/8f8060a8bda43f3fba3ed59e27bd189e8e4382f3))
+
 ### [0.0.14](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.13...v0.0.14) (2020-08-24)
 
 ### [0.0.13](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.12...v0.0.13) (2020-08-24)
