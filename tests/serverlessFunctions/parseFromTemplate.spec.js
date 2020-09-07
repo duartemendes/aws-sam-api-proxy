@@ -341,13 +341,19 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const parameters = {
+    const refOverrides = {
       EnvVarParameterTwo: 'envVar_tok_two',
       LocalParameterTwo: 'local_tok_two',
       GlobalParameterTwo: 'global_tok_two',
     };
 
-    const functions = parseFunctionsFromTemplate(template, vars, portOffset, basePath, parameters);
+    const functions = parseFunctionsFromTemplate(
+      template,
+      vars,
+      portOffset,
+      basePath,
+      refOverrides,
+    );
 
     expect(functions).toMatchObject([
       {

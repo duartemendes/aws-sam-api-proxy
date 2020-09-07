@@ -3,7 +3,7 @@ import { join } from 'path';
 const isServerlessFunction = ({ Type }) => Type === 'AWS::Serverless::Function';
 const isApiEvent = ({ Type }) => Type.includes('Api');
 
-const resolveEnvValue = (parameters) => (val) => (typeof val === 'object' && 'Ref' in val ? parameters[val.Ref] || val.Ref : val);
+const resolveEnvValue = (refOverrides) => (val) => (typeof val === 'object' && 'Ref' in val ? refOverrides[val.Ref] || val.Ref : val);
 const mapValues = (f, env) => Object.keys(env).reduce((curr, k) => ({
   ...curr,
   [k]: f(env[k]),
@@ -23,7 +23,7 @@ const buildFnPathData = (path) => {
   };
 };
 
-export default (template, envVars, portOffset, basePath, parameters = {}) => {
+export default (template, envVars, portOffset, basePath, refOverrides = {}) => {
   const functionGlobals = template?.Globals?.Function ?? {};
 
   return Object.entries(template.Resources)
@@ -47,7 +47,7 @@ export default (template, envVars, portOffset, basePath, parameters = {}) => {
       const { Type, Properties: { Path, Method, PayloadFormatVersion } } = resource.ApiEvent;
 
       const environment = mapValues(
-        resolveEnvValue(parameters),
+        resolveEnvValue(refOverrides),
         {
           ...functionGlobals.Environment?.Variables,
           ...resource.Properties.Environment?.Variables,

@@ -30,18 +30,24 @@ const getDistinctDockerImages = (functions) => Array.from(new Set(
   functions.map(({ dockerImageWithTag }) => dockerImageWithTag),
 ));
 
-const parseParameters = ({ parameters = '' }) => parameters
+const parseRefOverrides = ({ refOverrides = '' }) => refOverrides
   .split(',')
   .map((p) => p.split('='))
   .reduce((curr, [key, value]) => ({ ...curr, [key]: value }), {});
 
 export default async (dockerService, options) => {
   const { template, envVars } = await getRequiredDependencies(options);
-  const parameters = parseParameters(options);
+  const refOverrides = parseRefOverrides(options);
 
   const { apiName, basePath, port } = options;
   const portOffset = port + 1;
-  const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath, parameters);
+  const functions = parseFunctionsFromTemplate(
+    template,
+    envVars,
+    portOffset,
+    basePath,
+    refOverrides,
+  );
 
   await Promise.all([
     dockerService.removeApiContainers(apiName),

@@ -18,7 +18,7 @@ program
   .option('-t, --template <template>', 'Relative path to the SAM template', 'template.yaml')
   .option('--docker-network <dockerNetwork>', 'The docker network you want your containers to connect to')
   .option('--base-path <basePath>', 'The base path of the API', process.cwd())
-  .option('--parameters <parameters>', 'Comma-separated key=value pairs to use when resolving Ref calls in your function environments')
+  .option('--ref-overrides <refOverrides>', 'Comma-separated key=value pairs to use when resolving Ref calls in your function environments')
   .action(async (apiName, options) => {
     await dockerService.validateDockerStatus();
 
@@ -28,7 +28,7 @@ program
       envVars,
       basePath,
       dockerNetwork,
-      parameters,
+      refOverrides,
     } = options;
 
     const params = {
@@ -38,7 +38,7 @@ program
       envVars,
       basePath,
       dockerNetwork,
-      parameters,
+      refOverrides,
     };
 
     await startApi(dockerService, params);

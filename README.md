@@ -62,22 +62,39 @@ sam-proxy start my-api --port 3000
 Or, with all the options available:
 
 ```bash
-sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --parameters Env=dev,MyDynamoTable=http://localhost:8000
+sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --ref-overrides Env=dev,MyDynamoTable=http://localhost:8000
 ```
 
-#### Environment Variables
+### Tearing down the house
+
+#### For a specific API
+
+```bash
+sam-proxy teardown my-api
+```
+
+#### For all APIs
+
+```bash
+sam-proxy teardown-all
+```
+
+## Environment Variables
 
 Environment variables defined in your template.yaml either at the Function
-level or within `Globals.Function` are passed to the function containers. If
-the variable is a plain string, it is passed to the function as-is. If the
-variable is a `!Ref` then the value will be resolved using the parameters
-passed to `sam-proxy start`. If the variable name is not present in the
-parameters given, the variable will not be set at all.
+level or within `Globals.Function` are passed to the function containers.
+You can use `--env-vars` option to override variables pretty much as
+you would do using sam cli.
 
-Note that the parameters provided to `sam-proxy start` do not need to be
-defined inside the template's `Parameters` section. This allows you to fake
-resolution of other resources with `!Ref`. For example, passing 
-`--parameters MyDynamoTable=http://localhost:8000` with a template as follows would
+### Overriding references
+
+If the variable is a `!Ref` then the value will be resolved using the
+`ref-overrides` option passed to `sam-proxy start`.
+
+Note that the references provided to `sam-proxy start` do not need to be
+defined inside the template's `Parameters` section. This allows you to **fake
+resolution of other resources** with `!Ref`. For example, passing 
+`--ref-overrides MyDynamoTable=http://localhost:8000` with a template as follows would
 allow your function to communicate with a local DynamoDB instance:
 
 ```yaml
@@ -93,20 +110,6 @@ Resources:
   MyDynamoTable:
     Type: AWS::DynamoDB::Table
     # ...
-```
-
-### Tearing down the house
-
-#### For a specific API
-
-```bash
-sam-proxy teardown my-api
-```
-
-#### For all APIs
-
-```bash
-sam-proxy teardown-all
 ```
 
 ### More
