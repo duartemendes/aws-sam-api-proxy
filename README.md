@@ -202,7 +202,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 
 ## Roadmap
 
-- Setup CI/CD
 - Support JSON template
 - Log levels
 - Fill events missing data:
