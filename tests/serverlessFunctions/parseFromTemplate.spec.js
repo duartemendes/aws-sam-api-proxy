@@ -286,4 +286,90 @@ describe('parseFromTemplate()', () => {
       { name: 'GetResources', containerPort: 3003, handler: 'GetResourcesHandler.default' },
     ]);
   });
+
+  it('should resolve Refs in function environments', () => {
+    const template = {
+      Globals: {
+        Function: {
+          Environment: {
+            Variables: {
+              GLOBAL_TOKEN_1: 'global_tok_one',
+              GLOBAL_TOKEN_2: { Ref: 'GlobalParameterTwo' },
+              GLOBAL_TOKEN_3: { Ref: 'GlobalAbsentParameter' },
+              OVERRIDDEN_TOKEN: 'global',
+            },
+          },
+        },
+      },
+      Resources: {
+        GetSomething: {
+          Type: 'AWS::Serverless::Function',
+          Properties: {
+            CodeUri: './dist',
+            Handler: 'GetSomethingHandler.default',
+            Runtime: 'nodejs12.x',
+            MemorySize: 256,
+            Timeout: 10,
+            Environment: {
+              Variables: {
+                LOCAL_TOKEN_1: 'local_tok_one',
+                LOCAL_TOKEN_2: { Ref: 'LocalParameterTwo' },
+                LOCAL_TOKEN_3: { Ref: 'LocalAbsentParameter' },
+                OVERRIDDEN_TOKEN: 'local',
+              },
+            },
+            Events: {
+              GetSomethingEvent: {
+                Type: 'Api',
+                Properties: {
+                  Path: '/resource',
+                  Method: 'GET',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const vars = {
+      GetSomething: {
+        ENVVAR_TOKEN_1: 'envVar_tok_one',
+        ENVVAR_TOKEN_2: { Ref: 'EnvVarParameterTwo' },
+        ENVVAR_TOKEN_3: { Ref: 'EnvVarAbsentParameter' },
+        OVERRIDDEN_TOKEN: 'envVar',
+      },
+    };
+
+    const refOverrides = {
+      EnvVarParameterTwo: 'envVar_tok_two',
+      LocalParameterTwo: 'local_tok_two',
+      GlobalParameterTwo: 'global_tok_two',
+    };
+
+    const functions = parseFunctionsFromTemplate(
+      template,
+      vars,
+      portOffset,
+      basePath,
+      refOverrides,
+    );
+
+    expect(functions).toMatchObject([
+      {
+        name: 'GetSomething',
+        containerPort: 3001,
+        handler: 'GetSomethingHandler.default',
+        environment: {
+          ENVVAR_TOKEN_1: 'envVar_tok_one',
+          ENVVAR_TOKEN_2: 'envVar_tok_two',
+          GLOBAL_TOKEN_1: 'global_tok_one',
+          GLOBAL_TOKEN_2: 'global_tok_two',
+          LOCAL_TOKEN_1: 'local_tok_one',
+          LOCAL_TOKEN_2: 'local_tok_two',
+          OVERRIDDEN_TOKEN: 'envVar',
+        },
+      },
+    ]);
+  });
 });
