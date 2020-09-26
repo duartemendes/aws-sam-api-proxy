@@ -6,8 +6,9 @@ describe('parseFromTemplate()', () => {
       DB_NAME: 'my_database',
     },
   };
-  const portOffset = 3001;
+  const portOffset = 3010;
   const basePath = '/Users/foo/api';
+  const portIncrement = 10;
 
   it('should ignore resources that are not serverless functions', () => {
     const template = {
@@ -278,12 +279,19 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
+    const functions = parseFunctionsFromTemplate(
+      template,
+      envVars,
+      portOffset,
+      basePath,
+      {},
+      portIncrement,
+    );
 
     expect(functions).toMatchObject([
-      { name: 'Greeting_0', containerPort: 3001, handler: 'GreetHandler.default' },
-      { name: 'Greeting_1', containerPort: 3002, handler: 'GreetHandler.default' },
-      { name: 'GetResources', containerPort: 3003, handler: 'GetResourcesHandler.default' },
+      { name: 'Greeting_0', containerPort: 3010, handler: 'GreetHandler.default' },
+      { name: 'Greeting_1', containerPort: 3020, handler: 'GreetHandler.default' },
+      { name: 'GetResources', containerPort: 3030, handler: 'GetResourcesHandler.default' },
     ]);
   });
 
@@ -358,7 +366,7 @@ describe('parseFromTemplate()', () => {
     expect(functions).toMatchObject([
       {
         name: 'GetSomething',
-        containerPort: 3001,
+        containerPort: 3010,
         handler: 'GetSomethingHandler.default',
         environment: {
           ENVVAR_TOKEN_1: 'envVar_tok_one',
