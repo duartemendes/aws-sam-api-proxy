@@ -5,6 +5,9 @@ describe('parseFromTemplate()', () => {
     GetSomething: {
       DB_NAME: 'my_database',
     },
+    Greeting: {
+      DB_NAME: 'my_greeting',
+    },
   };
   const portOffset = 3001;
   const basePath = '/Users/foo/api';
@@ -281,9 +284,23 @@ describe('parseFromTemplate()', () => {
     const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
 
     expect(functions).toMatchObject([
-      { name: 'Greeting_0', containerPort: 3001, handler: 'GreetHandler.default' },
-      { name: 'Greeting_1', containerPort: 3002, handler: 'GreetHandler.default' },
-      { name: 'GetResources', containerPort: 3003, handler: 'GetResourcesHandler.default' },
+      {
+        name: 'Greeting_0',
+        containerPort: 3001,
+        handler: 'GreetHandler.default',
+        environment: { DB_NAME: 'my_greeting' },
+      },
+      {
+        name: 'Greeting_1',
+        containerPort: 3002,
+        handler: 'GreetHandler.default',
+        environment: { DB_NAME: 'my_greeting' },
+      },
+      {
+        name: 'GetResources',
+        containerPort: 3003,
+        handler: 'GetResourcesHandler.default',
+      },
     ]);
   });
 
