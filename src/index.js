@@ -39,14 +39,20 @@ export default async (dockerService, options) => {
   const { template, envVars } = await getRequiredDependencies(options);
   const refOverrides = parseRefOverrides(options);
 
-  const { apiName, basePath, port } = options;
-  const portOffset = port + 1;
+  const {
+    apiName,
+    basePath,
+    port,
+    portIncrement,
+  } = options;
+  const portOffset = port + portIncrement;
   const functions = parseFunctionsFromTemplate(
     template,
     envVars,
     portOffset,
     basePath,
     refOverrides,
+    portIncrement,
   );
 
   await Promise.all([
