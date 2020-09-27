@@ -1,5 +1,4 @@
 import { createDockerService } from '../../src/docker';
-import functions from '../fixtures/functions';
 
 describe('dockerService', () => {
   const apiName = 'test-api';

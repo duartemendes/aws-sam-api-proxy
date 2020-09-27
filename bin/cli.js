@@ -19,6 +19,7 @@ program
   .option('--docker-network <dockerNetwork>', 'The docker network you want your containers to connect to')
   .option('--base-path <basePath>', 'The base path of the API', process.cwd())
   .option('--ref-overrides <refOverrides>', 'Comma-separated key=value pairs to use when resolving Ref calls in your function environments')
+  .option('--port-increment <portIncrement>', 'The increment value for ports that containers will use', '1')
   .action(async (apiName, options) => {
     await dockerService.validateDockerStatus();
 
@@ -29,6 +30,7 @@ program
       basePath,
       dockerNetwork,
       refOverrides,
+      portIncrement,
     } = options;
 
     const params = {
@@ -39,6 +41,7 @@ program
       basePath,
       dockerNetwork,
       refOverrides,
+      portIncrement: Number(portIncrement),
     };
 
     await startApi(dockerService, params);
