@@ -33,7 +33,7 @@ export default (template, envVars, portOffset, basePath, refOverrides = {}, port
       .filter(isApiEvent)
       .map((ApiEvent, i, apiEvents) => [
         name + (apiEvents.length > 1 ? `_${i}` : ''),
-        { ApiEvent, ...resource },
+        { ApiEvent, functionName: name, ...resource },
       ]))
     .reduce((result, [name, resource], i) => {
       const {
@@ -51,7 +51,7 @@ export default (template, envVars, portOffset, basePath, refOverrides = {}, port
         {
           ...functionGlobals.Environment?.Variables,
           ...resource.Properties.Environment?.Variables,
-          ...envVars[name],
+          ...envVars[resource.functionName],
         },
       );
 
