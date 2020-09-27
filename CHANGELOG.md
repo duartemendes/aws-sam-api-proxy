@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.17](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.16...v0.0.17) (2020-09-27)
+
+
+### Features
+
+* adding an option for the value of port increment ([dfed5c0](https://github.com/duartemendes/aws-sam-api-proxy/commit/dfed5c03d0e4e124285542b7a225456eabc89dec))
+
+
+### Bug Fixes
+
+* envvars are well-injected on multiple events containers ([#12](https://github.com/duartemendes/aws-sam-api-proxy/issues/12)) ([b6fdea7](https://github.com/duartemendes/aws-sam-api-proxy/commit/b6fdea78f1aabcd11a4d9414d04cd779730b0495))
+
 ### [0.0.16](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.15...v0.0.16) (2020-09-07)
 
 ### [0.0.15](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.14...v0.0.15) (2020-09-07)
