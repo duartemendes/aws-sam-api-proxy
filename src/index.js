@@ -2,6 +2,7 @@ import path from 'path';
 import { readFile } from 'fs';
 import { promisify } from 'util';
 import { yamlParse } from 'yaml-cfn';
+import log from 'loglevel';
 import { parseFunctionsFromTemplate } from './serverlessFunctions';
 import { buildContainerOptions } from './docker';
 import spinUpServer from './server';
@@ -44,6 +45,7 @@ export default async (dockerService, options) => {
     basePath,
     port,
     portIncrement,
+    logLevel,
   } = options;
   const portOffset = port + portIncrement;
   const functions = parseFunctionsFromTemplate(
@@ -54,6 +56,12 @@ export default async (dockerService, options) => {
     refOverrides,
     portIncrement,
   );
+
+  if (Object.keys(log.levels).includes(logLevel.toUpperCase())) {
+    log.setLevel(logLevel);
+  } else {
+    log.setLevel('debug');
+  }
 
   await Promise.all([
     dockerService.removeApiContainers(apiName),

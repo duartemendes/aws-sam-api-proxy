@@ -62,7 +62,7 @@ sam-proxy start my-api --port 3000
 Or, with all the options available:
 
 ```bash
-sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --ref-overrides Env=dev,MyDynamoTable=http://localhost:8000
+sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --ref-overrides Env=dev,MyDynamoTable=http://localhost:8000 --log-level info
 ```
 
 ### Tearing down the house
@@ -203,7 +203,6 @@ This tool wouldn't be possible without [lambci/docker-lambda](https://github.com
 ## Roadmap
 
 - Support JSON template
-- Log levels
 - Fill events missing data:
   - requestContext
   - multiValueHeaders
