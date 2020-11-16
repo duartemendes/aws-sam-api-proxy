@@ -20,6 +20,7 @@ program
   .option('--base-path <basePath>', 'The base path of the API', process.cwd())
   .option('--ref-overrides <refOverrides>', 'Comma-separated key=value pairs to use when resolving Ref calls in your function environments')
   .option('--port-increment <portIncrement>', 'The increment value for ports that containers will use', '1')
+  .option('--log-level <logLevel>', 'The log level to use (trace, debug, info, warn, error)', 'debug')
   .action(async (apiName, options) => {
     await dockerService.validateDockerStatus();
 
@@ -31,6 +32,7 @@ program
       dockerNetwork,
       refOverrides,
       portIncrement,
+      logLevel,
     } = options;
 
     const params = {
@@ -42,6 +44,7 @@ program
       dockerNetwork,
       refOverrides,
       portIncrement: Number(portIncrement),
+      logLevel,
     };
 
     await startApi(dockerService, params);

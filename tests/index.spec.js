@@ -17,6 +17,7 @@ describe('index', () => {
     port: 3000,
     template: './fixtures/template.yaml',
     envVars: './fixtures/envVars.json',
+    logLevel: 'debug',
   };
   let dockerServiceStub;
 

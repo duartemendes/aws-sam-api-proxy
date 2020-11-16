@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import log from 'loglevel';
 import createApiGatewayProxyEvent from '../apiGatewayProxyEvent';
 import { matchFunctionsAgainstRequest } from '../serverlessFunctions';
 import { buildFromRawHeaders } from '../request';
@@ -9,7 +10,7 @@ export default (httpClient, functions) => (req, res) => {
   const [path, querystring = ''] = url.split('?');
   const headers = buildFromRawHeaders(rawHeaders ?? []);
 
-  console.log(`[${id}] Received request`, {
+  log.debug(`[${id}] Received request`, {
     url, method, headers, path, qs: querystring,
   });
 
@@ -26,7 +27,7 @@ export default (httpClient, functions) => (req, res) => {
     try {
       return await fn();
     } catch (err) {
-      console.log(`[${id}] Failed with error`, err);
+      log.error(`[${id}] Failed with error`, err);
       return sendError(500, err.message);
     }
   };
@@ -38,10 +39,10 @@ export default (httpClient, functions) => (req, res) => {
     const { containerPort, name } = matchedFn;
 
     if (matchesFns.length > 1) {
-      console.log(`[${id}] Found multiple function events for this request, selecting first...`, { name });
+      log.debug(`[${id}] Found multiple function events for this request, selecting first...`, { name });
     }
 
-    console.log(`[${id}] Proxying request to port ${containerPort}`);
+    log.debug(`[${id}] Proxying request to port ${containerPort}`);
 
     const urlToCall = `http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`;
     const event = createApiGatewayProxyEvent(matchedFn, {
@@ -53,7 +54,7 @@ export default (httpClient, functions) => (req, res) => {
 
     const { statusCode, headers: resHeaders, body: resBody } = upstreamResponse;
     const requestDurationInMs = new Date() - startDate;
-    console.log(`[${id}] Lambda responded with ${statusCode} status code and took ${requestDurationInMs} ms`);
+    log.debug(`[${id}] Lambda responded with ${statusCode} status code and took ${requestDurationInMs} ms`);
 
     if (upstreamResponse.errorMessage !== undefined) {
       return sendError(502, upstreamResponse.errorMessage);

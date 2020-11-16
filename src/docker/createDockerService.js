@@ -1,9 +1,11 @@
+import log from 'loglevel';
+
 const LABEL_KEY = 'aws-sam-api-proxy.api';
 
 export default (docker) => {
   const removeContainers = async (label) => {
     const containersData = await docker.listContainers({ all: true, filters: { label: [label] } });
-    console.log(`Found ${containersData.length} containers, removing...`);
+    log.info(`Found ${containersData.length} containers, removing...`);
 
     const containers = await Promise.all(containersData.map(({ Id }) => docker.getContainer(Id)));
     return Promise.all(containers.map((container) => container.remove({ force: true })));
@@ -19,7 +21,7 @@ export default (docker) => {
     removeAllContainers: async () => removeContainers(LABEL_KEY),
     removeApiContainers: async (apiName) => removeContainers(`${LABEL_KEY}=${apiName}`),
     pullImages: async (images) => {
-      console.log('Pulling required docker images, this might take a while...', images);
+      log.info('Pulling required docker images, this might take a while...', images);
 
       const promises = images.map((image) => new Promise((resolve, reject) => {
         docker.pull(image, (pullErr, stream) => {
@@ -29,7 +31,7 @@ export default (docker) => {
             err ? reject(err) : resolve(output);
           };
           const onProgress = (event) => {
-            console.log(event.status);
+            log.info(event.status);
           };
 
           return docker.modem.followProgress(stream, onFinished, onProgress);
@@ -37,13 +39,13 @@ export default (docker) => {
       }));
 
       await Promise.all(promises);
-      console.log('All required docker images have been pulled successfully.');
+      log.info('All required docker images have been pulled successfully.');
     },
     createContainers: async (containersOptions) => {
       const promises = containersOptions.map(async (containerOptions) => {
         const container = await docker.createContainer(containerOptions);
 
-        console.log('Starting container', { id: container.id, name: containerOptions.name });
+        log.info('Starting container', { id: container.id, name: containerOptions.name });
         await container.start();
 
         return container.id;
