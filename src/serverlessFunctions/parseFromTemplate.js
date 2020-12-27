@@ -23,7 +23,15 @@ const buildFnPathData = (path) => {
   };
 };
 
-export default (template, envVars, portOffset, basePath, refOverrides = {}, portIncrement = 1) => {
+export default (
+  template,
+  envVars,
+  portOffset,
+  basePath,
+  refOverrides = {},
+  portIncrement = 1,
+  baseImageRepo = 'lambci/lambda',
+) => {
   const functionGlobals = template?.Globals?.Function ?? {};
 
   return Object.entries(template.Resources)
@@ -68,7 +76,7 @@ export default (template, envVars, portOffset, basePath, refOverrides = {}, port
         path: buildFnPathData(Path),
         method: Method.toLowerCase(),
         containerPort: portOffset + i * portIncrement,
-        dockerImageWithTag: `lambci/lambda:${runtime}`,
+        dockerImageWithTag: `${baseImageRepo}:${runtime}`,
         distPath: join(basePath, codeUri),
       });
     }, []);
