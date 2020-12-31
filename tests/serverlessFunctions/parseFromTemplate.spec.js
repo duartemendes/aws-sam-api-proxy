@@ -76,7 +76,7 @@ describe('parseFromTemplate()', () => {
       },
     };
 
-    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath);
+    const functions = parseFunctionsFromTemplate(template, envVars, portOffset, basePath, {}, 1, 'public.ecr.aws/p0o6c8z6/lambda');
 
     expect(functions).toHaveLength(1);
     expect(functions[0]).toEqual({
@@ -116,7 +116,7 @@ describe('parseFromTemplate()', () => {
       method: 'get',
       containerPort: portOffset,
       environment: envVars.GetSomething,
-      dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+      dockerImageWithTag: 'public.ecr.aws/p0o6c8z6/lambda:nodejs12.x',
       distPath: '/Users/foo/api/dist',
     });
   });

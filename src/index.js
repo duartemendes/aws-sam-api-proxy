@@ -46,6 +46,7 @@ export default async (dockerService, options) => {
     port,
     portIncrement,
     logLevel,
+    baseImageRepo,
   } = options;
   const portOffset = port + portIncrement;
   const functions = parseFunctionsFromTemplate(
@@ -55,6 +56,7 @@ export default async (dockerService, options) => {
     basePath,
     refOverrides,
     portIncrement,
+    baseImageRepo,
   );
 
   if (Object.keys(log.levels).includes(logLevel.toUpperCase())) {

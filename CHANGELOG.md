@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.19](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.18...v0.0.19) (2020-12-27)
+
+
+### Features
+
+* baseImageRepo option to replace lambci/lambda ([#14](https://github.com/duartemendes/aws-sam-api-proxy/issues/14)) ([a16f3a6](https://github.com/duartemendes/aws-sam-api-proxy/commit/a16f3a69915033b96ad8e0579f56fa6bd823f468))
+
 ### [0.0.18](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.17...v0.0.18) (2020-11-16)
 
 
