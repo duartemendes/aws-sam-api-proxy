@@ -62,6 +62,12 @@ describe('index', () => {
     expect(spinUpServer).toHaveBeenCalledWith(functions, options.port, options.apiName);
   });
 
+  it('should be able to skip to pull images', async () => {
+    await startApi(dockerServiceStub, { ...options, skipPullImages: true });
+
+    expect(dockerServiceStub.pullImages).toHaveBeenCalledTimes(0);
+  });
+
   it('should set envVars as an empty object when no envVars path is given', async () => {
     await startApi(dockerServiceStub, { ...options, envVars: undefined });
 
