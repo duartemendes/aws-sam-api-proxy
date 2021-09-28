@@ -21,6 +21,8 @@ program
   .option('--ref-overrides <refOverrides>', 'Comma-separated key=value pairs to use when resolving Ref calls in your function environments')
   .option('--port-increment <portIncrement>', 'The increment value for ports that containers will use', '1')
   .option('--log-level <logLevel>', 'The log level to use (trace, debug, info, warn, error)', 'debug')
+  .option('--base-image-repo <baseRepo>', 'Repository to pull base container image(eg. public.ecr.aws/p0o6c8z6/lambda), defaults to lambci/lambda from system default (usually docker.io)', 'lambci/lambda')
+  .option('--skip-pull-images', 'Optionally skip to pull base image')
   .action(async (apiName, options) => {
     await dockerService.validateDockerStatus();
 
@@ -33,6 +35,8 @@ program
       refOverrides,
       portIncrement,
       logLevel,
+      baseImageRepo,
+      skipPullImages,
     } = options;
 
     const params = {
@@ -45,6 +49,8 @@ program
       refOverrides,
       portIncrement: Number(portIncrement),
       logLevel,
+      baseImageRepo,
+      skipPullImages,
     };
 
     await startApi(dockerService, params);

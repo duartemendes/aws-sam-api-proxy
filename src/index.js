@@ -39,6 +39,7 @@ const parseRefOverrides = ({ refOverrides = '' }) => refOverrides
 export default async (dockerService, options) => {
   const { template, envVars } = await getRequiredDependencies(options);
   const refOverrides = parseRefOverrides(options);
+  const dockerServiceTasks = [];
 
   const {
     apiName,
@@ -46,6 +47,8 @@ export default async (dockerService, options) => {
     port,
     portIncrement,
     logLevel,
+    baseImageRepo,
+    skipPullImages,
   } = options;
   const portOffset = port + portIncrement;
   const functions = parseFunctionsFromTemplate(
@@ -55,6 +58,7 @@ export default async (dockerService, options) => {
     basePath,
     refOverrides,
     portIncrement,
+    baseImageRepo,
   );
 
   if (Object.keys(log.levels).includes(logLevel.toUpperCase())) {
@@ -63,10 +67,13 @@ export default async (dockerService, options) => {
     log.setLevel('debug');
   }
 
-  await Promise.all([
-    dockerService.removeApiContainers(apiName),
-    dockerService.pullImages(getDistinctDockerImages(functions)),
-  ]);
+  dockerServiceTasks.push(dockerService.removeApiContainers(apiName));
+
+  if (!skipPullImages) {
+    dockerServiceTasks.push(dockerService.pullImages(getDistinctDockerImages(functions)));
+  }
+
+  await Promise.all(dockerServiceTasks);
 
   const containersOptions = functions.map((f) => buildContainerOptions(f, options));
   await dockerService.createContainers(containersOptions);
