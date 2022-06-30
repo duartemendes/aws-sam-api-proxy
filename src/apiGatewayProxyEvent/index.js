@@ -32,7 +32,7 @@ export default ({ path: fnPath, event }, {
     queryStringParameters,
     isBase64Encoded: false,
     stageVariables: null,
-    requestContext: null,
+    requestContext: {},
   };
 
   const eventBuildStrategy = getEventBuildStrategy(event);
