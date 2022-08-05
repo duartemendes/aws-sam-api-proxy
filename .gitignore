@@ -13,3 +13,6 @@ coverage
 
 ## distribution
 /dist
+
+# Ignore sample code
+sample

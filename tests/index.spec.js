@@ -72,14 +72,14 @@ describe('index', () => {
     await startApi(dockerServiceStub, { ...options, envVars: undefined });
 
     expect(parseFunctionsFromTemplate).toHaveBeenCalledTimes(1);
-    expect(parseFunctionsFromTemplate.mock.calls[0][1]).toEqual({});
+    expect(parseFunctionsFromTemplate.mock.calls[0][2]).toEqual({});
   });
 
   it('should parse ref-overrides correctly', async () => {
     await startApi(dockerServiceStub, { ...options, refOverrides: 'A=1,B=two,API_KEY=tok_1234' });
 
     expect(parseFunctionsFromTemplate).toHaveBeenCalledTimes(1);
-    expect(parseFunctionsFromTemplate.mock.calls[0][4]).toEqual({
+    expect(parseFunctionsFromTemplate.mock.calls[0][5]).toEqual({
       A: '1',
       B: 'two',
       API_KEY: 'tok_1234',

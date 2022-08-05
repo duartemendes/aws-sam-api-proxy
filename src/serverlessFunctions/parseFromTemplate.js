@@ -25,6 +25,7 @@ const buildFnPathData = (path) => {
 
 export default (
   template,
+  templatePath,
   envVars,
   portOffset,
   basePath,
@@ -77,7 +78,7 @@ export default (
         method: Method.toLowerCase(),
         containerPort: portOffset + i * portIncrement,
         dockerImageWithTag: `${baseImageRepo}:${runtime}`,
-        distPath: join(basePath, codeUri),
+        distPath: join(basePath, templatePath, '../', codeUri),
       });
     }, []);
 };
