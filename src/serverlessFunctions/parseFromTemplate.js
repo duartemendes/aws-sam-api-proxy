@@ -23,8 +23,32 @@ const buildFnPathData = (path) => {
   };
 };
 
+const buildLayersConfig = (basePath, templatePath, template, prelimLayers) => {
+  const config = [];
+
+  if (prelimLayers && prelimLayers.length > 0) {
+    prelimLayers.forEach((layer) => {
+      if (!('Ref' in layer)) throw new Error('Only referenced layers are supported.');
+
+      const layerName = layer.Ref;
+      const cftLayer = template.Resources[layerName];
+      const layerContentUri = cftLayer.Properties.ContentUri;
+      const hostSource = join(basePath, templatePath, '../', layerContentUri);
+      const layerConfig = {
+        hostSource,
+        containerDestination: '/opt',
+      };
+
+      config.push(layerConfig);
+    });
+  }
+
+  return config;
+};
+
 export default (
   template,
+  templatePath,
   envVars,
   portOffset,
   basePath,
@@ -50,6 +74,7 @@ export default (
         CodeUri: codeUri = functionGlobals.CodeUri,
         MemorySize: memorySize = functionGlobals.MemorySize,
         Timeout: timeout = functionGlobals.Timeout,
+        Layers: prelimLayers = functionGlobals.Layers,
       } = resource.Properties;
 
       const { Type, Properties: { Path, Method, PayloadFormatVersion } } = resource.ApiEvent;
@@ -62,6 +87,8 @@ export default (
           ...envVars[resource.functionName],
         },
       );
+
+      const layers = buildLayersConfig(basePath, templatePath, template, prelimLayers);
 
       return result.concat({
         name,
@@ -77,7 +104,8 @@ export default (
         method: Method.toLowerCase(),
         containerPort: portOffset + i * portIncrement,
         dockerImageWithTag: `${baseImageRepo}:${runtime}`,
-        distPath: join(basePath, codeUri),
+        distPath: join(basePath, templatePath, '../', codeUri),
+        layers,
       });
     }, []);
 };

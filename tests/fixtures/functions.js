@@ -13,6 +13,7 @@ export default [
     containerPort: 3001,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+    layers: [],
   },
   {
     event: {
@@ -35,6 +36,7 @@ export default [
     containerPort: 3002,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs12.x',
+    layers: [],
   },
   {
     method: 'post',
@@ -69,6 +71,7 @@ export default [
     containerPort: 3004,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs10.x',
+    layers: [],
   },
   {
     method: 'any',
@@ -88,5 +91,6 @@ export default [
     containerPort: 3005,
     environment: {},
     dockerImageWithTag: 'lambci/lambda:nodejs10.x',
+    layers: [],
   },
 ];

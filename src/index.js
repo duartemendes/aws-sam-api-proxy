@@ -49,10 +49,12 @@ export default async (dockerService, options) => {
     logLevel,
     baseImageRepo,
     skipPullImages,
+    template: templatePath,
   } = options;
   const portOffset = port + portIncrement;
   const functions = parseFunctionsFromTemplate(
     template,
+    templatePath,
     envVars,
     portOffset,
     basePath,
