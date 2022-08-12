@@ -119,6 +119,7 @@ describe('parseFromTemplate()', () => {
       environment: envVars.GetSomething,
       dockerImageWithTag: 'public.ecr.aws/p0o6c8z6/lambda:nodejs12.x',
       distPath: '/Users/foo/api/dist',
+      layers: [],
     });
   });
 

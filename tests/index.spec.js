@@ -18,6 +18,7 @@ describe('index', () => {
     template: './fixtures/template.yaml',
     envVars: './fixtures/envVars.json',
     logLevel: 'debug',
+    layers: [],
   };
   let dockerServiceStub;
 
