@@ -1,6 +1,6 @@
 {
   "name": "@s-cardenas/aws-sam-api-proxy",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "AWS SAM API Proxy CLI",
   "keywords": [
     "aws",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "commander": "^5.1.0",
-    "dockerode": "^3.2.0",
+    "dockerode": "^3.3.3",
     "got": "^11.0.3",
     "lodash.snakecase": "^4.1.1",
     "loglevel": "^1.7.0",
