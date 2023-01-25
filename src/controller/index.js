@@ -33,6 +33,17 @@ export default (httpClient, functions) => (req, res) => {
   };
 
   req.on('end', async () => asyncTryOrFail(async () => {
+    // Enable cors
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST, GET');
+    res.setHeader('Access-Control-Max-Age', '2592000');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
+    if (method === 'OPTIONS') {
+      return res.writeHead(204, {}).end();
+    }
+
     const matchesFns = matchFunctionsAgainstRequest(functions, { path, method });
     if (matchesFns.length === 0) return sendError(404, 'Failed to find a function event for this request');
     const matchedFn = matchesFns[0];

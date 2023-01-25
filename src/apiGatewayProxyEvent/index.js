@@ -36,7 +36,12 @@ export default ({ path: fnPath, event }, {
   };
 
   const eventBuildStrategy = getEventBuildStrategy(event);
-  const specific = eventBuildStrategy({ path, method, querystring });
+  const specific = eventBuildStrategy({
+    path,
+    method,
+    querystring,
+    headers,
+  });
 
   return { ...common, ...specific };
 };

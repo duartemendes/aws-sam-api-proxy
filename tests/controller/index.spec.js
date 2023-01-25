@@ -23,6 +23,7 @@ describe('controller', () => {
     res = {
       writeHead: jest.fn().mockReturnThis(),
       end: jest.fn().mockReturnThis(),
+      setHeader: jest.fn().mockReturnThis(),
     };
 
     httpClientStub = {
@@ -120,7 +121,16 @@ describe('controller', () => {
     const { containerPort } = functionsWithReplicatedValue[1];
     expect(httpClientStub.post).toHaveBeenCalledWith(
       `http://localhost:${containerPort}/2015-03-31/functions/myfunction/invocations`,
-      { json: event },
+      expect.objectContaining({
+        json: {
+          ...event,
+          requestContext: {
+            ...event.requestContext,
+            requestId: expect.any(String),
+            requestTime: expect.any(String),
+          },
+        },
+      }),
     );
   });
 });

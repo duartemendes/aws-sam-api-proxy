@@ -1,4 +1,5 @@
 import createApiGatewayProxyEvent from '../../src/apiGatewayProxyEvent';
+import { makeMultiValueHeaders, makeRequestContext } from '../../src/apiGatewayProxyEvent/api';
 import functions from '../fixtures/functions';
 
 describe('createApiGatewayProxyEvent()', () => {
@@ -21,25 +22,36 @@ describe('createApiGatewayProxyEvent()', () => {
     };
 
     const event = createApiGatewayProxyEvent(functionData, request);
-
-    expect(event).toEqual({
-      body: request.body,
+    const requestContext = makeRequestContext({
       headers: request.headers,
-      pathParameters: {
-        id: '1',
-      },
-      queryStringParameters: {
-        enabled: 'true',
-      },
-      isBase64Encoded: false,
-      stageVariables: null,
-      requestContext: {},
+      method: request.method,
       path: request.path,
-      httpMethod: request.method,
-      multiValueHeaders: null,
-      multiValueQueryStringParameters: null,
-      resource: '/{proxy+}',
     });
+
+    expect(event).toEqual(
+      expect.objectContaining({
+        body: request.body,
+        headers: request.headers,
+        pathParameters: {
+          id: '1',
+        },
+        queryStringParameters: {
+          enabled: 'true',
+        },
+        isBase64Encoded: false,
+        stageVariables: null,
+        requestContext: {
+          ...requestContext,
+          requestId: expect.any(String),
+          requestTime: expect.any(String),
+        },
+        path: request.path,
+        httpMethod: request.method,
+        multiValueHeaders: makeMultiValueHeaders(request.headers),
+        multiValueQueryStringParameters: null,
+        resource: request.path,
+      }),
+    );
   });
 
   it('should build event for HttpApi 1.0 when given PayloadFormatVersion is 1.0', () => {
