@@ -6,8 +6,6 @@ import { version } from '../package.json';
 import { createDockerService } from '../dist/docker';
 import startApi from '../dist';
 
-const dockerService = createDockerService(new Docker());
-
 program.version(version);
 
 program
@@ -24,9 +22,8 @@ program
   .option('--base-image-repo <baseRepo>', 'Repository to pull base container image(eg. public.ecr.aws/p0o6c8z6/lambda), defaults to lambci/lambda from system default (usually docker.io)', 'lambci/lambda')
   .option('--skip-pull-images', 'Optionally skip to pull base image')
   .option('-aws, --aws-credentials-folder <awsCredentialsFolder>', 'Absolute path to your local aws credentials folder. (i.e. \'/Users/john/.aws\')')
+  .option('--docker-socket-path <dockerSocketPath>', 'Daemon docker option.', '/var/run/docker.sock')
   .action(async (apiName, options) => {
-    await dockerService.validateDockerStatus();
-
     const {
       port,
       template,
@@ -39,7 +36,12 @@ program
       baseImageRepo,
       skipPullImages,
       awsCredentialsFolder,
+      dockerSocketPath,
     } = options;
+
+    const dockerService = createDockerService(new Docker({ socketPath: dockerSocketPath }));
+
+    await dockerService.validateDockerStatus();
 
     const params = {
       apiName,
@@ -62,7 +64,12 @@ program
 program
   .command('teardown <apiName>')
   .description('Remove api leftovers - i.e. docker containers created by this tool (identifiable by a label)')
-  .action(async (apiName) => {
+  .option('--docker-socket-path <dockerSocketPath>', 'Daemon docker option. Defaults to /var/run/docker.sock', '/var/run/docker.sock')
+  .action(async (apiName, options) => {
+    const { dockerSocketPath } = options;
+
+    const dockerService = createDockerService(new Docker({ socketPath: dockerSocketPath }));
+
     await dockerService.validateDockerStatus();
     console.log(`Cleaning up all containers created by this tool for api "${apiName}"`);
     await dockerService.removeApiContainers(apiName);
@@ -72,7 +79,12 @@ program
 program
   .command('teardown-all')
   .description('Remove all api leftovers - i.e. docker containers created by this tool (identifiable by a label)')
-  .action(async () => {
+  .option('--docker-socket-path <dockerSocketPath>', 'Daemon docker option. Defaults to /var/run/docker.sock', '/var/run/docker.sock')
+  .action(async (options) => {
+    const { dockerSocketPath } = options;
+
+    const dockerService = createDockerService(new Docker({ socketPath: dockerSocketPath }));
+
     await dockerService.validateDockerStatus();
     console.log('Cleaning up all containers created by this tool');
     await dockerService.removeAllContainers();
