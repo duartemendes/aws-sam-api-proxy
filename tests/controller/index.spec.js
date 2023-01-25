@@ -31,7 +31,6 @@ describe('controller', () => {
     };
 
     controller = createController(httpClientStub, functionsWithReplicatedValue);
-    console.log('controller: ', controller);
   });
 
   beforeEach(() => {
