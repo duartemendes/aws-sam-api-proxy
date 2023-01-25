@@ -21,6 +21,8 @@ This tool will spin up a local server and proxy any incoming request to the expe
   - All runtimes are supported
 - Path parameters, querystring, body and headers are all passed through the request, with no changes
 - Already supports Http Apis
+- Supports local lambda function layers (`ContentUri` must be a relative path)
+- Supports specifing your own docker socket path for added compatibility with Docker Desktop on Linux
 
 ## Motivation
 
@@ -62,7 +64,7 @@ sam-proxy start my-api --port 3000
 Or, with all the options available:
 
 ```bash
-sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --ref-overrides Env=dev,MyDynamoTable=http://localhost:8000 --log-level info
+sam-proxy start my-api --port 3000 --base-path ~/my-api --template template.yaml --env-vars envVars.json --docker-network my_network --ref-overrides Env=dev,MyDynamoTable=http://localhost:8000 --log-level info --docker-socket-path /home/john-doe/.docker/desktop/docker.sock
 ```
 
 ### Tearing down the house
@@ -93,7 +95,7 @@ If the variable is a `!Ref` then the value will be resolved using the
 
 Note that the references provided to `sam-proxy start` do not need to be
 defined inside the template's `Parameters` section. This allows you to **fake
-resolution of other resources** with `!Ref`. For example, passing 
+resolution of other resources** with `!Ref`. For example, passing
 `--ref-overrides MyDynamoTable=http://localhost:8000` with a template as follows would
 allow your function to communicate with a local DynamoDB instance:
 
@@ -105,7 +107,7 @@ Resources:
       Environment:
         Variables:
           DB_HOST: !Ref MyDynamoTable
-  
+
   # Ignored by aws-sam-api-proxy:
   MyDynamoTable:
     Type: AWS::DynamoDB::Table
