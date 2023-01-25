@@ -1,6 +1,6 @@
 {
-  "name": "@s-cardenas/aws-sam-api-proxy",
-  "version": "0.0.32",
+  "name": "aws-sam-api-proxy",
+  "version": "0.0.20",
   "description": "AWS SAM API Proxy CLI",
   "keywords": [
     "aws",
