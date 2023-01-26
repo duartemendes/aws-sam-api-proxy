@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.21](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.20...v0.0.21) (2023-01-26)
+
+
+### Features
+
+* support local layers, local AWS credentials file, and own docker socket path ([#17](https://github.com/duartemendes/aws-sam-api-proxy/issues/17)) ([b61d86d](https://github.com/duartemendes/aws-sam-api-proxy/commit/b61d86d9a41d256b07c75fd3210f0d9f01ff14f6))
+
+
+### Bug Fixes
+
+* requestContext be truthy ([#16](https://github.com/duartemendes/aws-sam-api-proxy/issues/16)) ([f9896b2](https://github.com/duartemendes/aws-sam-api-proxy/commit/f9896b2f955fa06b1eb2265a97129bc7c3d2efea))
+
 ### [0.0.20](https://github.com/duartemendes/aws-sam-api-proxy/compare/v0.0.19...v0.0.20) (2021-01-01)
 
 
